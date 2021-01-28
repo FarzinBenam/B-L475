@@ -16,10 +16,10 @@
 
 /* List of AT Command                                                        */
 /* -------------------------user defined command---------------------------- */
-#define AT_SET_USER_SSID                  "C1=Vodafone-F919"
-#define AT_SET_USER_PASSPHRASE            "C2=EwAMuAMNPrHHTuNh"
-#define AT_SET_USER_SECURITY_TYPE         "C3=3"
-#define AT_SET_USER_DHCP                  "C4=1"
+#define AT_SET_USER_SSID                  "Vodafone-F919"
+#define AT_SET_USER_PASSPHRASE            "EwAMuAMNPrHHTuNh"
+#define AT_SET_USER_SECURITY_TYPE         "3"
+#define AT_SET_USER_DHCP                  "1"
 
 
 

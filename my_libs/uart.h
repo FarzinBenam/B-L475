@@ -11,7 +11,8 @@
 
 
 
-
+#define write     _usart1_printf
+#define terminal  printf
 
 
 

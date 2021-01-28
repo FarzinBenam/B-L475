@@ -23,6 +23,7 @@ static const char _CMD_tmpbckread[]	= "TMPBCKREAD";
 static const char _CMD_date[]				= "DATE";
 static const char _CMD_alarm[]			= "ALARM";
 static const char _CMD_wifi[]				= "WIFI";
+static const char _CMD_wifilisten[] = "WIFILISTEN";
 
 static const char _Param_set[]			= "SET";
 //******************************************
@@ -285,7 +286,7 @@ void	WiFi							(void)
 		}
 	}
 	if(USART3->ISR & IO_5){					// if suddenly an interrupt occured, check this dummy interrupt
-		write("unknown state, usart rescieved: 0x%.2x",USART3->RDR);
+		terminal("unknown state, usart rescieved: 0x%.2x",USART3->RDR);
 		goto error;
 	}
 	
@@ -297,15 +298,42 @@ void	WiFi							(void)
 error :
 	wificmdStatus = 0;
 	nl(1);
-	write("WiFi read Error!");// %d", TimeoutCount);
+	terminal("WiFi read Error!");// %d", TimeoutCount);
 	cmd_exit();
   return;
 }
 
-void	Listen						(void)
+void	Wifilisten						(void)
 {
 	char temp;
-	
+  nl(1);
+  terminal("Entering WiFi direct command mode");
+  nl(1);
+  __disable_irq();	// Disable interrupts
+
+  while(1){
+    if(USART3->ISR & USART_ISR_RXNE){
+      _usart1_send_b(USART3->RDR);
+      USART3->RQR |= (1<<3);
+      GPIOA->ODR ^= LD1;
+    }
+    
+    if(USART1->ISR & USART_ISR_RXNE){
+      temp = USART1->RDR;
+      if(temp == '`'){
+        nl(1);
+        terminal("Exiting Command Mode");
+        nl(1);
+        break;
+      }
+      _usart1_send_b(temp);
+      _usart3_send_b(temp);
+      USART1->RQR |= (1<<3);
+      GPIOB->ODR ^= LD2;
+    }
+  }
+  __enable_irq();	// Disable interrupts
+	cmd_exit();
 }
 //************************************************************************
 //* System Configurations
@@ -500,14 +528,14 @@ void	wifi_init			(void)
 error :
 	wificmdStatus = 0;
 	nl(1);
-	write("WIFI Init Error!");// %d", TimeoutCount);
+	terminal("WIFI Init Error!");// %d", TimeoutCount);
   return;	
 	
 	
 Done :
 	wificmdStatus = 0;
 	nl(1);
-	write("WiFi - OK!");// %d", TimeoutCount);
+	terminal("WiFi - OK!");// %d", TimeoutCount);
 	return;
 }
 //************************************************************************
@@ -763,6 +791,7 @@ void	cmd_process_inits	(void)
 	// Adding new Commands to system
 	add_command(_CMD_Time, &time);
 	add_command(_CMD_wifi, &WiFi);
+  add_command(_CMD_wifilisten,&Wifilisten);
 	//add_command(_CMD_tmp, &temprat);
 	//add_command(_CMD_lcd, &lcd);
 	//add_command(_CMD_date, &date);
@@ -881,20 +910,12 @@ void	EXTI15_10_IRQHandler	(void)
 }
 void	USART1_IRQHandler			(void)
 {
-	char temp = USART1->RDR;
-	_usart1_send_b(temp);
-	_usart3_send_b(temp);
-	
 	CmdStatus = 1;
 	USART1->RQR |= (1<<3);
 	GPIOB->ODR ^= LD2;
 }
 void	USART3_IRQHandler			(void)
 {
-	_usart1_send_b(USART3->RDR);
-	
-	
-	
 	wificmdStatus = 1;
 	USART3->RQR |= (1<<3);
 	GPIOA->ODR ^= LD1;
@@ -905,4 +926,36 @@ void SysTick_Handler				(void)
 	 //_usart1_printf("\n\rtick: %d!", tick);
 	// GPIOA->ODR ^= LD1;
 }
+
+
 //************************************************************************
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -34,6 +34,7 @@
 #include "stm32l4xx.h"                  // Device header
 #include "../my_libs/fcmd.h"
 #include "../my_libs/Processes.h"
+//#include "../my_libs/wifi.h"
 //#include "../my_libs/es_wifi.h"
 //************************************************************************
 //* Specific Variable Definitions
@@ -64,9 +65,12 @@ volatile uint8_t wificmdStatus = 0;
 
 int main (void)
 {
+  
 	OsInits ();
-	while(1);
+  
+  
 
+  
 	while(1)
 	{
 

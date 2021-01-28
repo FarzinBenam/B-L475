@@ -28,7 +28,7 @@
 #define IIC_BUFFER_SIZE	512
 #define	WIFI_BUFFER_SIZE 1024
 
-#define write						_usart1_printf
+
 //************************************************************************
 //* Specific Structure Definitions
 //************************************************************************/
