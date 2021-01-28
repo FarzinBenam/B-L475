@@ -8,20 +8,13 @@ void	OsInits (void);
 void	RCC_Config 				(void);
 void	GPIO_Config				(void);
 void	ISR_Config				(void);
-void	USART1_Config			(void);
-void	USART3_Config 		(void);
 void	RTC_Config				(void);
-void	SPI3_Config 			(void);
 void	Systick_EN				(int tick);
 uint32_t getTick				(void);
 void	wifi_init 			(void);
 
 // Pheripheral Funtions
 void	WIFI_Init					(void);
-int		SPI_Transmit			(uint8_t *pData, uint16_t Size);
-int		spi_wifi_send			(uint8_t *pdata,  uint16_t len);
-int		spi_recieve8			(uint8_t dat);
-int		SPI_Receive16			(uint8_t *pData, int cmd);
 int		wifi_recieve			(void);
 void	wifi_cmd					(uint8_t *pdata);
 void	wifi_init_cmds		(void);
@@ -45,12 +38,6 @@ void	time_UTC					(int epoch);
 void	WiFi							(void);
 
 
-void	_usart1_send_b						(int ch);
-void	_usart1_send_s						(const char Message[]);
-void	_usart1_printf							(const char *format, ...);
-int		read							(void);
-void	_usart3_send_b	(int ch);
-void	_usart3_send_s		(const char Message[]);
 
 
 
