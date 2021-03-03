@@ -24,6 +24,7 @@ static const char _CMD_date[]				= "DATE";
 static const char _CMD_alarm[]			= "ALARM";
 static const char _CMD_wifi[]				= "WIFI";
 static const char _CMD_wifilisten[] = "WIFILISTEN";
+static const char _CMD_help[]				= "HELP";
 
 static const char _Param_set[]			= "SET";
 //******************************************
@@ -88,8 +89,8 @@ void	time							(void)
 	
 	//nl(1);
 	//_usart1_printf("Time: %.2X:%.2X:%.2X ",time.hour, time.min, time.sec);
-	_usart1_printf("%.2X:%.2X:%.2X ",time.hour, time.min, time.sec);
-	if(RTC->TR & IO_22) _usart1_printf("PM");
+	terminal("%.2X:%.2X:%.2X ",time.hour, time.min, time.sec);
+	if(RTC->TR & IO_22) terminal("PM");
 
 	//nl(1);
 	//_usart1_printf("Date: 20%.2X:%.2X:%.2X ", time.year, time.month, time.mday);
@@ -123,7 +124,7 @@ void	time_UTC					(int epoch)
 	leap_days=0; 
 	leap_year_ind=0;
 	nl(1);
-	_usart1_printf("------------------------------\n");    
+	terminal("------------------------------\n");    
 //	_usart1_printf("EPOCH => %d",&epoch);
 
 	// Add or substract time zone here. 
@@ -171,60 +172,60 @@ void	time_UTC					(int epoch)
 
 	switch(ntp_week_day) {
 											 
-											 case 0:  _usart1_printf("Sunday");
+											 case 0:  terminal("Sunday");
 															 break;
-											 case 1:  _usart1_printf("Monday");
+											 case 1:  terminal("Monday");
 															 break;
-											 case 2:  _usart1_printf("Tuesday");
+											 case 2:  terminal("Tuesday");
 															 break;
-											 case 3:  _usart1_printf("Wednesday");
+											 case 3:  terminal("Wednesday");
 															 break;
-											 case 4:  _usart1_printf("Thursday");
+											 case 4:  terminal("Thursday");
 															 break;
-											 case 5:  _usart1_printf("Friday");
+											 case 5:  terminal("Friday");
 															 break;
-											 case 6:  _usart1_printf("Saturday");
+											 case 6:  terminal("Saturday");
 															 break;
 											 default: break;        
 											 }
-	 _usart1_printf(", "); 
+	 terminal(", "); 
 
 	switch(ntp_month) {
 												 
-												 case 1:  _usart1_printf("January");
+												 case 1:  terminal("January");
 																 break;
-												 case 2:  _usart1_printf("February");
+												 case 2:  terminal("February");
 																 break;
-												 case 3:  _usart1_printf("March");
+												 case 3:  terminal("March");
 																 break;
-												 case 4:  _usart1_printf("April");
+												 case 4:  terminal("April");
 																 break;
-												 case 5:  _usart1_printf("May");
+												 case 5:  terminal("May");
 																 break;
-												 case 6:  _usart1_printf("June");
+												 case 6:  terminal("June");
 																 break;
-												 case 7:  _usart1_printf("July");
+												 case 7:  terminal("July");
 																 break;
-												 case 8:  _usart1_printf("August");
+												 case 8:  terminal("August");
 																 break;
-												 case 9:  _usart1_printf("September");
+												 case 9:  terminal("September");
 																 break;
-												 case 10:  _usart1_printf("October");
+												 case 10:  terminal("October");
 																 break;
-												 case 11:  _usart1_printf("November");
+												 case 11:  terminal("November");
 																 break;
-												 case 12:  _usart1_printf("December");       
+												 case 12:  terminal("December");       
 												 default: break;        
 												 }
 
-	 _usart1_printf(" %2d",ntp_date);
-	 _usart1_printf(", %d\n",ntp_year);
-	 _usart1_printf("TIME = %2d : %2d : %2d\n\r", ntp_hour,ntp_minute,ntp_second)  ;
+	 terminal(" %2d",ntp_date);
+	 terminal(", %d\n",ntp_year);
+	 terminal("TIME = %2d : %2d : %2d\n\r", ntp_hour,ntp_minute,ntp_second)  ;
 //	 _usart1_printf("Days since Epoch: %d\n",days_since_epoch);
 //	 _usart1_printf("Number of Leap days since EPOCH: %d\n",leap_days);
 //	 _usart1_printf("Day of year = %d\n", day_of_year);
 //	 _usart1_printf("Is Year Leap? %d\n",leap_year_ind);
-	 _usart1_printf("===============================\n");
+	 terminal("===============================\n");
 	
 	cmd_exit();
   return;
@@ -303,7 +304,7 @@ error :
   return;
 }
 
-void	Wifilisten						(void)
+void	Wifilisten				(void)
 {
 	char temp;
   nl(1);
@@ -335,6 +336,20 @@ void	Wifilisten						(void)
   __enable_irq();	// Disable interrupts
 	cmd_exit();
 }
+void  Help              (void)
+{
+  int i = 0;
+  nl(1);
+  terminal("List of commands: ");
+  nl(1);
+  
+  for(; i < 10; i++){
+    nl(1);
+    terminal("%s", Cmds[i].Command);
+  }
+  
+  cmd_exit();
+}
 //************************************************************************
 //* System Configurations
 //************************************************************************  
@@ -344,6 +359,7 @@ void	RCC_Config		(void)
 	RCC->APB1ENR1 |= (1 << 28);						// Bit 28 PWREN: Power interface clock enable
 	//RCC->APB1ENR1 |= (1 << 15);						// Bit 15 SPI3EN: SPI3 clock enable
 	RCC->APB1ENR1 |= (1 << 18);						// Bit 18 USART3EN: USART3 clock enable
+  RCC->APB1ENR1 |= (1 << 22);           // Bit 22 I2CEN: i2c clock enable
 	
 	// this bit is enabled in ISR_Config() for better understanding
 //	RCC->APB2ENR	|= RCC_APB2ENR_SYSCFGEN;// Bit 0 SYSCFGEN: SYSCFG + COMP + VREFBUF clock enable
@@ -418,6 +434,21 @@ void	GPIO_Config		(void)
 //	GPIOE->OSPEEDR&= ~IO_1;								// NSS pin Medium speed
 	GPIOE->MODER	|= IO_16;								// PE8	ISM43362-RST 				output(Reset pin)
 	GPIOE->MODER	&= ~IO_17;							// PE8	ISM43362-RST 				output(Reset pin)
+  
+  
+  // I2C_2
+	/*******************************************************************************/
+  // PB10 = I2C2_SCL
+  // PB11 = I2C2_SDA
+  
+  GPIOB->MODER |= (IO_21|IO_23);                // Alternate function mode
+  GPIOB->MODER &= ~(IO_20|IO_22);               // Alternate function mode
+  
+  GPIOB->OSPEEDR |= (IO_20|IO_21|IO_22|IO_23);  // Very high speed mode
+  
+  GPIOB->AFR[1] |= (IO_10|IO_14);               // I2C2_SCL & I2C2_SDA
+  GPIOB->AFR[1] &= ~(IO_8|IO_9|IO_11|IO_12|IO_13|IO_15);
+  
 }
 
 
@@ -474,8 +505,6 @@ void	RTC_Config		(void)
 	RCC->BDCR &= ~IO_9;										// Bits 9:8 RTCSEL[1:0]: RTC clock source selection
 	RCC->BDCR |= (1<<15);									// Bit 15 RTCEN: RTC clock enable
 	
-	nl(1);
-	_usart1_printf("RTC - OK!");
 }
 
 void	Systick_EN		(int tick)
@@ -492,7 +521,7 @@ uint32_t getTick		(void)
 	
 	return _tick;
 }
-void	wifi_init			(void)
+void	wifi_wakeup		(void)
 {
 	volatile int TimeoutCount = 0;
 	volatile int ack = 0;
@@ -534,8 +563,6 @@ error :
 	
 Done :
 	wificmdStatus = 0;
-	nl(1);
-	terminal("WiFi - OK!");// %d", TimeoutCount);
 	return;
 }
 //************************************************************************
@@ -594,7 +621,7 @@ void	OsInits			(void)
 	
 	__enable_irq();
 	
-	wifi_init();
+	wifi_wakeup();
 	Welcome();
 }
 
@@ -642,7 +669,7 @@ void	halt				(int num)
 {	
 	//while(GPIOC->IDR & IO_13)
 	nl(1);
-	_usart1_printf("Halt_%d", num);
+	terminal("Halt_%d", num);
 	while(num--)
 	{
 		//LED1_ON;													// BSRR register low byte is as set
@@ -792,7 +819,8 @@ void	cmd_process_inits	(void)
 	add_command(_CMD_Time, &time);
 	add_command(_CMD_wifi, &WiFi);
   add_command(_CMD_wifilisten,&Wifilisten);
-	//add_command(_CMD_tmp, &temprat);
+	add_command(_CMD_help, &Help);
+  //add_command(_CMD_tmp, &temprat);
 	//add_command(_CMD_lcd, &lcd);
 	//add_command(_CMD_date, &date);
 }
@@ -893,7 +921,7 @@ void	EXTI1_IRQHandler 			(void)
 {
 	CmdStatus = 5;
 
-	_usart1_printf("\n\rim here cmd: %d!", CmdStatus);
+	terminal("\n\rim here cmd: %d!", CmdStatus);
 	EXTI->PR1 |= EXTI_PR1_PIF1;			// Pending interrupt flag on line x (x = 16 to 0)
 	
 	

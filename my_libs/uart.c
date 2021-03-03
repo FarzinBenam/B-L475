@@ -3,9 +3,9 @@
   * @file			
   * @author		Farzin M.Benam
   * @version	
-  * @date		2020-12-18
+  * @date     2020-12-18
   * @brief		
-  *             uart
+  *             
   *******************************************************************************
  The serial interface USART1 is directly available as a Virtual COM port of the PC 
  connected to the ST-LINK/V2-1 USB connector CN7. The Virtual COM port settings 
@@ -18,6 +18,9 @@
 #include "uart.h"
 
 
+/*******************************************************************************
+ * USART1 Functions
+ *******************************************************************************/
 void	USART1_Config   (void)
 {
   /* USARTx configured as follow:
@@ -32,24 +35,18 @@ void	USART1_Config   (void)
 	USART1->CR1		|= (1 << 3)|(1 << 2);				// RE | TE enbale
 	USART1->CR1		|= (1 << 0);								// IO_0 UE: USART enable
 }
-void	USART3_Config   (void)
-{
-	USART3->BRR		= (F_CPU / USART3_BAUDRATE);	// 115200 Bps Baud Rate at 8Mhz
-	USART3->CR1		|= (1 << 3)|(1 << 2);				// RE | TE enbale
-	USART3->CR1		|= (1 << 0);								// IO_0 UE: USART enable
-}
-
 int		_usart1_read            (void)
 {
 	while(!(USART1->ISR & IO_5));					// RXNE: Read data register not empty
 	
 	return USART1->RDR;
 }
-void	_usart1_send_b	(int ch) 
+int   _usart1_send_b	(int ch) 
 {
 	while(!(USART1->ISR & IO_7));					// TXE: Transmit data register empty
 	
 	USART1->TDR = ch;//(ch & (uint16_t)0x01FF);
+  return ch;
 }
 void	_usart1_send_s  (const char Message[])
 {
@@ -60,21 +57,19 @@ void	_usart1_send_s  (const char Message[])
 		USART1->TDR = Message[i++];
 	}
 }
-void	_usart1_printf  (const char *format, ...)
+
+
+
+
+/*******************************************************************************
+ * USART3 Functions
+ *******************************************************************************/
+void	USART3_Config   (void)
 {
-	static  uint8_t  buffer[40 + 1];
-	va_list     vArgs;
-
-	va_start(vArgs, format);
-	vsprintf((char *)buffer, (char const *)format, vArgs);
-	va_end(vArgs);
-	
-	_usart1_send_s((char *) buffer);
-	
-	
+	USART3->BRR		= (F_CPU / USART3_BAUDRATE);	// 115200 Bps Baud Rate at 8Mhz
+	USART3->CR1		|= (1 << 3)|(1 << 2);				// RE | TE enbale
+	USART3->CR1		|= (1 << 0);								// IO_0 UE: USART enable
 }
-
-
 void	_usart3_send_b	(int ch) 
 {
 	while(!(USART3->ISR & IO_7));					// TXE: Transmit data register empty
@@ -96,31 +91,33 @@ void	_usart3_send_s	(const char Message[])
 /******************************************************************************* 
  * interface to the stdio.h library.
  * All the I/O directed to the console.
+ * after this we can use the stdio functions like: printf
 ********************************************************************************/
-struct	__FILE {
-	int handle;
-	 /* Whatever you require here. If the only file you are using is
-		* standard output using printf() for debugging, no file handling
-		* is required. */
-};
+//to avoid redifintion of the __FILE we comment this session
+//struct	__FILE {
+//	int handle;
+//	 /* Whatever you require here. If the only file you are using is
+//		* standard output using printf() for debugging, no file handling
+//		* is required. */
+//};
 
-FILE __stdin = {0};
+FILE __stdin =  {0};
 FILE __stdout = {1};
 FILE __stderr = {2};
 
 int fgetc (FILE *f){
     int c;
-    c = _uart1_read();           // read the character from console
+    c = _usart1_read();           // read the character from console
     
     if (c == '\r'){             // if \r, after it is echoed, a \n sent
-        _usart1_write(c);         // echo
+        _usart1_send_b(c);         // echo
         c = '\n';
     }
-    uart1_write(c);            // echo
+    _usart1_send_b(c);            // echo
     
     return c;
 }
 
 int fputc (int c, FILE *f){
-    return uart1_write(c);      // write the character to console
+    return _usart1_send_b(c);      // write the character to console
 }

@@ -89,7 +89,7 @@ int		SPI_Transmit	(uint8_t *pData, uint16_t Size)
 	
 	error :
 		nl(1);
-		_usart1_printf("SPI Transmit Error");
+		terminal("SPI Transmit Error");
 		return -1;	
 }
 /**
@@ -127,7 +127,7 @@ int		SPI_Receive8	(uint8_t *pData, uint16_t Size)
 	
 error :
 	nl(1);
-	_usart1_printf("SPI Recieve Error");
+	terminal("SPI Recieve Error");
   return -1;
 }
 /**
@@ -195,7 +195,7 @@ int		SPI_Receive16	(uint8_t *pData, int cmd)
 	
 error :
 	nl(1);
-	_usart1_printf("SPI Recieve Error");
+	terminal("SPI Recieve Error");
 	CmdStatus = 0;
   return -1;
 }

@@ -1,0 +1,23 @@
+11:18:30 **** Incremental Build of configuration Debug for project 01_helloworld ****
+make -j4 all 
+Building file: ../src/main.c
+Invoking: MCU GCC Compiler
+C:\Users\Somaye\Dropbox\Projects\C\ARM\IOT_Board\rtos_workspace\01_helloworld\Debug
+arm-none-eabi-gcc -mcpu=cortex-m4 -mthumb -mfloat-abi=hard -mfpu=fpv4-sp-d16 -DSTM32 -DSTM32L4 -DSTM32L475VGTx -DDEBUG -O0 -g3 -Wall -fmessage-length=0 -ffunction-sections -c -MMD -MP -MF"src/main.d" -MT"src/main.o" -o "src/main.o" "../src/main.c"
+Finished building: ../src/main.c
+ 
+Building target: 01_helloworld.elf
+Invoking: MCU GCC Linker
+arm-none-eabi-gcc -mcpu=cortex-m4 -mthumb -mfloat-abi=hard -mfpu=fpv4-sp-d16 -T"C:/Users/Somaye/Dropbox/Projects/C/ARM/IOT_Board/rtos_workspace/01_helloworld/LinkerScript.ld" -Wl,-Map=output.map -Wl,--gc-sections -o "01_helloworld.elf" @"objects.list"   -lm
+Finished building target: 01_helloworld.elf
+ 
+make --no-print-directory post-build
+Generating binary and Printing size information:
+arm-none-eabi-objcopy -O binary "01_helloworld.elf" "01_helloworld.bin"
+arm-none-eabi-size "01_helloworld.elf"
+   text	   data	    bss	    dec	    hex	filename
+    944	   1088	   1088	   3120	    c30	01_helloworld.elf
+ 
+
+11:18:32 Build Finished (took 1s.602ms)
+

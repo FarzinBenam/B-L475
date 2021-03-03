@@ -34,8 +34,9 @@
 #include "stm32l4xx.h"                  // Device header
 #include "../my_libs/fcmd.h"
 #include "../my_libs/Processes.h"
-//#include "../my_libs/wifi.h"
-//#include "../my_libs/es_wifi.h"
+#include "../my_libs/wifi.h"
+#include "../my_libs/wifi_cmds.h"
+#include "../my_libs/i2c.h"
 //************************************************************************
 //* Specific Variable Definitions
 //************************************************************************
@@ -69,7 +70,10 @@ int main (void)
 	OsInits ();
   
   
-
+  //WIFI_Connect(AT_SET_USER_SSID, AT_SET_USER_PASSPHRASE, 0x03);
+  
+  i2c_peripheral_enable(I2C2);
+  
   
 	while(1)
 	{

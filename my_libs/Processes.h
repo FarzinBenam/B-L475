@@ -14,7 +14,7 @@ uint32_t getTick				(void);
 void	wifi_init 			(void);
 
 // Pheripheral Funtions
-void	WIFI_Init					(void);
+void	WIFI_wakeup					(void);
 int		wifi_recieve			(void);
 void	wifi_cmd					(uint8_t *pdata);
 void	wifi_init_cmds		(void);
