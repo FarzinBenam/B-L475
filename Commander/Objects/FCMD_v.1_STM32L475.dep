@@ -1,126 +1,320 @@
 Dependencies for Project 'FCMD_v.1', Target 'STM32L475': (DO NOT MODIFY !)
 CompilerVersion: 6150000::V6.15::ARMCLANG
-F (.\main.c)(0x6013198D)(-xc -std=c99 --target=arm-arm-none-eabi -mcpu=cortex-m4 -mfpu=fpv4-sp-d16 -mfloat-abi=hard -c-fno-rtti -funsigned-char -fshort-enums -fshort-wchar-D__EVAL -gdwarf-3 -Oz -ffunction-sections -Wno-packed -Wno-missing-variable-declarations -Wno-missing-prototypes -Wno-missing-noreturn -Wno-sign-conversion -Wno-nonportable-include-path -Wno-reserved-id-macro -Wno-unused-macros -Wno-documentation-unknown-command -Wno-documentation -Wno-license-management -Wno-parentheses-equality -Wno-covered-switch-default -Wno-unreachable-code-break -I ../my_libs-I./RTE/_STM32L475-IC:/Users/Somaye/AppData/Local/Arm/Packs/ARM/CMSIS/5.7.0/CMSIS/Core/Include-IC:/Users/Somaye/AppData/Local/Arm/Packs/Keil/STM32L4xx_DFP/2.5.0/Drivers/CMSIS/Device/ST/STM32L4xx/Include-D__UVISION_VERSION="533" -D_RTE_ -DSTM32L475xx -D_RTE_-o ./objects/main.o -MD)
-I (C:\Users\Somaye\AppData\Local\Arm\Packs\Keil\STM32L4xx_DFP\2.5.0\Drivers\CMSIS\Device\ST\STM32L4xx\Include\stm32l4xx.h)(0x5F731840)
-I (C:\Users\Somaye\AppData\Local\Arm\Packs\Keil\STM32L4xx_DFP\2.5.0\Drivers\CMSIS\Device\ST\STM32L4xx\Include\stm32l475xx.h)(0x5F731840)
-I (C:\Users\Somaye\AppData\Local\Arm\Packs\ARM\CMSIS\5.7.0\CMSIS\Core\Include\core_cm4.h)(0x5E8F2582)
-I (C:\Keil_v5\ARM\ARMCLANG\include\stdint.h)(0x5F373318)
-I (C:\Users\Somaye\AppData\Local\Arm\Packs\ARM\CMSIS\5.7.0\CMSIS\Core\Include\cmsis_version.h)(0x5E8F2582)
-I (C:\Users\Somaye\AppData\Local\Arm\Packs\ARM\CMSIS\5.7.0\CMSIS\Core\Include\cmsis_compiler.h)(0x5E835B22)
-I (C:\Users\Somaye\AppData\Local\Arm\Packs\ARM\CMSIS\5.7.0\CMSIS\Core\Include\cmsis_armclang.h)(0x5E8F2582)
-I (C:\Keil_v5\ARM\ARMCLANG\include\arm_compat.h)(0x5EE189B2)
-I (C:\Keil_v5\ARM\ARMCLANG\include\arm_acle.h)(0x5F26E9A8)
-I (C:\Users\Somaye\AppData\Local\Arm\Packs\ARM\CMSIS\5.7.0\CMSIS\Core\Include\mpu_armv7.h)(0x5E8F2582)
-I (C:\Users\Somaye\AppData\Local\Arm\Packs\Keil\STM32L4xx_DFP\2.5.0\Drivers\CMSIS\Device\ST\STM32L4xx\Include\system_stm32l4xx.h)(0x5F731840)
-I (..\my_libs\fcmd.h)(0x60130A3F)
-I (..\my_libs\Processes.h)(0x6013195B)
-I (..\my_libs\wifi.h)(0x601345D7)
-I (..\my_libs\uart.h)(0x60130E61)
-I (C:\Keil_v5\ARM\ARMCLANG\include\stdio.h)(0x5F373324)
-I (..\my_libs\wifi_cmds.h)(0x60130A3E)
-F (..\my_libs\fcmd.h)(0x60130A3F)()
-F (..\my_libs\Processes.c)(0x6017E56B)(-xc -std=c99 --target=arm-arm-none-eabi -mcpu=cortex-m4 -mfpu=fpv4-sp-d16 -mfloat-abi=hard -c-fno-rtti -funsigned-char -fshort-enums -fshort-wchar-D__EVAL -gdwarf-3 -Oz -ffunction-sections -Wno-packed -Wno-missing-variable-declarations -Wno-missing-prototypes -Wno-missing-noreturn -Wno-sign-conversion -Wno-nonportable-include-path -Wno-reserved-id-macro -Wno-unused-macros -Wno-documentation-unknown-command -Wno-documentation -Wno-license-management -Wno-parentheses-equality -Wno-covered-switch-default -Wno-unreachable-code-break -I ../my_libs-I./RTE/_STM32L475-IC:/Users/Somaye/AppData/Local/Arm/Packs/ARM/CMSIS/5.7.0/CMSIS/Core/Include-IC:/Users/Somaye/AppData/Local/Arm/Packs/Keil/STM32L4xx_DFP/2.5.0/Drivers/CMSIS/Device/ST/STM32L4xx/Include-D__UVISION_VERSION="533" -D_RTE_ -DSTM32L475xx -D_RTE_-o ./objects/processes.o -MD)
-I (..\my_libs\stm32l475xx.h)(0x5EEE197B)
-I (C:\Users\Somaye\AppData\Local\Arm\Packs\ARM\CMSIS\5.7.0\CMSIS\Core\Include\core_cm4.h)(0x5E8F2582)
-I (C:\Keil_v5\ARM\ARMCLANG\include\stdint.h)(0x5F373318)
-I (C:\Users\Somaye\AppData\Local\Arm\Packs\ARM\CMSIS\5.7.0\CMSIS\Core\Include\cmsis_version.h)(0x5E8F2582)
-I (C:\Users\Somaye\AppData\Local\Arm\Packs\ARM\CMSIS\5.7.0\CMSIS\Core\Include\cmsis_compiler.h)(0x5E835B22)
-I (C:\Users\Somaye\AppData\Local\Arm\Packs\ARM\CMSIS\5.7.0\CMSIS\Core\Include\cmsis_armclang.h)(0x5E8F2582)
-I (C:\Keil_v5\ARM\ARMCLANG\include\arm_compat.h)(0x5EE189B2)
-I (C:\Keil_v5\ARM\ARMCLANG\include\arm_acle.h)(0x5F26E9A8)
-I (C:\Users\Somaye\AppData\Local\Arm\Packs\ARM\CMSIS\5.7.0\CMSIS\Core\Include\mpu_armv7.h)(0x5E8F2582)
-I (C:\Users\Somaye\AppData\Local\Arm\Packs\Keil\STM32L4xx_DFP\2.5.0\Drivers\CMSIS\Device\ST\STM32L4xx\Include\system_stm32l4xx.h)(0x5F731840)
-I (..\my_libs\fcmd.h)(0x60130A3F)
-I (..\my_libs\Processes.h)(0x6013195B)
-I (..\my_libs\..\my_libs\uart.h)(0x60130E61)
-I (C:\Users\Somaye\AppData\Local\Arm\Packs\Keil\STM32L4xx_DFP\2.5.0\Drivers\CMSIS\Device\ST\STM32L4xx\Include\stm32l4xx.h)(0x5F731840)
-I (C:\Users\Somaye\AppData\Local\Arm\Packs\Keil\STM32L4xx_DFP\2.5.0\Drivers\CMSIS\Device\ST\STM32L4xx\Include\stm32l475xx.h)(0x5F731840)
+F (.\main.c)(0x6096DE89)(-xc -std=c99 --target=arm-arm-none-eabi -mcpu=cortex-m4 -mfpu=fpv4-sp-d16 -mfloat-abi=hard -c-fno-rtti -funsigned-char -fshort-enums -fshort-wchar-D__EVAL -gdwarf-3 -Oz -ffunction-sections -Wno-packed -Wno-missing-variable-declarations -Wno-missing-prototypes -Wno-missing-noreturn -Wno-sign-conversion -Wno-nonportable-include-path -Wno-reserved-id-macro -Wno-unused-macros -Wno-documentation-unknown-command -Wno-documentation -Wno-license-management -Wno-parentheses-equality -Wno-covered-switch-default -Wno-unreachable-code-break -I ../Commander -I ../Drivers/My_Drivers -I ../Drivers/CMSIS/Include -I ../Drivers/CMSIS/Device/ST/STM32L4xx/Include -I ../Drivers/STM32L4xx_HAL_Driver/Inc -I ./ThirdParty/FreeRTOS/include -I ./ThirdParty/FreeRTOS/portable/GCC/ARM_CM4F-IC:/Users/Somaye/AppData/Local/Arm/Packs/Keil/STM32L4xx_DFP/2.5.0/Drivers/CMSIS/Device/ST/STM32L4xx/Include-IC:/Keil_v5/ARM/CMSIS/Include-D__UVISION_VERSION="533" -DSTM32L475xx-o ./objects/main.o -MD)
+I (..\Drivers\My_Drivers\fcmd.h)(0x6096D7A7)
+I (..\Commander\main.h)(0x6096DB2E)
 I (C:\Keil_v5\ARM\ARMCLANG\include\stdio.h)(0x5F373324)
 I (C:\Keil_v5\ARM\ARMCLANG\include\stdlib.h)(0x5F37331E)
 I (C:\Keil_v5\ARM\ARMCLANG\include\stdarg.h)(0x5FEF86F1)
-F (..\my_libs\Processes.h)(0x6013195B)()
-F (..\my_libs\uart.c)(0x60130E29)(-xc -std=c99 --target=arm-arm-none-eabi -mcpu=cortex-m4 -mfpu=fpv4-sp-d16 -mfloat-abi=hard -c-fno-rtti -funsigned-char -fshort-enums -fshort-wchar-D__EVAL -gdwarf-3 -Oz -ffunction-sections -Wno-packed -Wno-missing-variable-declarations -Wno-missing-prototypes -Wno-missing-noreturn -Wno-sign-conversion -Wno-nonportable-include-path -Wno-reserved-id-macro -Wno-unused-macros -Wno-documentation-unknown-command -Wno-documentation -Wno-license-management -Wno-parentheses-equality -Wno-covered-switch-default -Wno-unreachable-code-break -I ../my_libs-I./RTE/_STM32L475-IC:/Users/Somaye/AppData/Local/Arm/Packs/ARM/CMSIS/5.7.0/CMSIS/Core/Include-IC:/Users/Somaye/AppData/Local/Arm/Packs/Keil/STM32L4xx_DFP/2.5.0/Drivers/CMSIS/Device/ST/STM32L4xx/Include-D__UVISION_VERSION="533" -D_RTE_ -DSTM32L475xx -D_RTE_-o ./objects/uart.o -MD)
-I (..\my_libs\uart.h)(0x60130E61)
-I (C:\Users\Somaye\AppData\Local\Arm\Packs\Keil\STM32L4xx_DFP\2.5.0\Drivers\CMSIS\Device\ST\STM32L4xx\Include\stm32l4xx.h)(0x5F731840)
-I (C:\Users\Somaye\AppData\Local\Arm\Packs\Keil\STM32L4xx_DFP\2.5.0\Drivers\CMSIS\Device\ST\STM32L4xx\Include\stm32l475xx.h)(0x5F731840)
-I (C:\Users\Somaye\AppData\Local\Arm\Packs\ARM\CMSIS\5.7.0\CMSIS\Core\Include\core_cm4.h)(0x5E8F2582)
+I (C:\Keil_v5\ARM\ARMCLANG\include\string.h)(0x5F373314)
+I (..\Drivers\CMSIS\Device\ST\STM32L4xx\Include\stm32l4xx.h)(0x608D820A)
+I (..\Drivers\CMSIS\Device\ST\STM32L4xx\Include\stm32l475xx.h)(0x608D820A)
+I (..\Drivers\CMSIS\Include\core_cm4.h)(0x608D820A)
 I (C:\Keil_v5\ARM\ARMCLANG\include\stdint.h)(0x5F373318)
-I (C:\Users\Somaye\AppData\Local\Arm\Packs\ARM\CMSIS\5.7.0\CMSIS\Core\Include\cmsis_version.h)(0x5E8F2582)
-I (C:\Users\Somaye\AppData\Local\Arm\Packs\ARM\CMSIS\5.7.0\CMSIS\Core\Include\cmsis_compiler.h)(0x5E835B22)
-I (C:\Users\Somaye\AppData\Local\Arm\Packs\ARM\CMSIS\5.7.0\CMSIS\Core\Include\cmsis_armclang.h)(0x5E8F2582)
-I (C:\Keil_v5\ARM\ARMCLANG\include\arm_compat.h)(0x5EE189B2)
-I (C:\Keil_v5\ARM\ARMCLANG\include\arm_acle.h)(0x5F26E9A8)
-I (C:\Users\Somaye\AppData\Local\Arm\Packs\ARM\CMSIS\5.7.0\CMSIS\Core\Include\mpu_armv7.h)(0x5E8F2582)
-I (C:\Users\Somaye\AppData\Local\Arm\Packs\Keil\STM32L4xx_DFP\2.5.0\Drivers\CMSIS\Device\ST\STM32L4xx\Include\system_stm32l4xx.h)(0x5F731840)
-I (..\my_libs\fcmd.h)(0x60130A3F)
+I (..\Drivers\CMSIS\Include\core_cmInstr.h)(0x608D820A)
+I (..\Drivers\CMSIS\Include\cmsis_armcc_V6.h)(0x608D820A)
+I (..\Drivers\CMSIS\Include\core_cmFunc.h)(0x608D820A)
+I (..\Drivers\CMSIS\Include\core_cmSimd.h)(0x608D820A)
+I (..\Drivers\CMSIS\Device\ST\STM32L4xx\Include\system_stm32l4xx.h)(0x608D820A)
+I (..\Drivers\My_Drivers\Processes.h)(0x6096D463)
+I (..\Drivers\My_Drivers\uart.h)(0x60950E6D)
+I (..\Drivers\My_Drivers\gpio.h)(0x60950E77)
+I (ThirdParty\FreeRTOS\include\FreeRTOS.h)(0x6072BF40)
+I (C:\Keil_v5\ARM\ARMCLANG\include\stddef.h)(0x5F37331E)
+I (ThirdParty\FreeRTOS\include\FreeRTOSConfig.h)(0x60733452)
+I (ThirdParty\FreeRTOS\include\projdefs.h)(0x5FD90663)
+I (ThirdParty\FreeRTOS\include\portable.h)(0x5FD90663)
+I (ThirdParty\FreeRTOS\include\deprecated_definitions.h)(0x5FD90663)
+I (ThirdParty\FreeRTOS\portable\GCC\ARM_CM4F\portmacro.h)(0x5FD90663)
+I (ThirdParty\FreeRTOS\include\mpu_wrappers.h)(0x5FD90663)
+I (ThirdParty\FreeRTOS\include\task.h)(0x5FD90663)
+I (ThirdParty\FreeRTOS\include\list.h)(0x5FD90663)
+I (ThirdParty\FreeRTOS\include\timers.h)(0x5FD90663)
+I (ThirdParty\FreeRTOS\include\queue.h)(0x5FD90663)
+I (ThirdParty\FreeRTOS\include\semphr.h)(0x5FD90663)
+I (ThirdParty\FreeRTOS\include\event_groups.h)(0x5FD90663)
+F (.\main.h)(0x6096DB2E)()
+F (.\fcmd.c)(0x6096DE1F)(-xc -std=c99 --target=arm-arm-none-eabi -mcpu=cortex-m4 -mfpu=fpv4-sp-d16 -mfloat-abi=hard -c-fno-rtti -funsigned-char -fshort-enums -fshort-wchar-D__EVAL -gdwarf-3 -Oz -ffunction-sections -Wno-packed -Wno-missing-variable-declarations -Wno-missing-prototypes -Wno-missing-noreturn -Wno-sign-conversion -Wno-nonportable-include-path -Wno-reserved-id-macro -Wno-unused-macros -Wno-documentation-unknown-command -Wno-documentation -Wno-license-management -Wno-parentheses-equality -Wno-covered-switch-default -Wno-unreachable-code-break -I ../Commander -I ../Drivers/My_Drivers -I ../Drivers/CMSIS/Include -I ../Drivers/CMSIS/Device/ST/STM32L4xx/Include -I ../Drivers/STM32L4xx_HAL_Driver/Inc -I ./ThirdParty/FreeRTOS/include -I ./ThirdParty/FreeRTOS/portable/GCC/ARM_CM4F-IC:/Users/Somaye/AppData/Local/Arm/Packs/Keil/STM32L4xx_DFP/2.5.0/Drivers/CMSIS/Device/ST/STM32L4xx/Include-IC:/Keil_v5/ARM/CMSIS/Include-D__UVISION_VERSION="533" -DSTM32L475xx-o ./objects/fcmd.o -MD)
+I (..\Drivers\My_Drivers\fcmd.h)(0x6096D7A7)
+I (..\Commander\main.h)(0x6096DB2E)
 I (C:\Keil_v5\ARM\ARMCLANG\include\stdio.h)(0x5F373324)
-F (..\my_libs\uart.h)(0x60130E61)()
-F (..\my_libs\spi.c)(0x60130EB1)(-xc -std=c99 --target=arm-arm-none-eabi -mcpu=cortex-m4 -mfpu=fpv4-sp-d16 -mfloat-abi=hard -c-fno-rtti -funsigned-char -fshort-enums -fshort-wchar-D__EVAL -gdwarf-3 -Oz -ffunction-sections -Wno-packed -Wno-missing-variable-declarations -Wno-missing-prototypes -Wno-missing-noreturn -Wno-sign-conversion -Wno-nonportable-include-path -Wno-reserved-id-macro -Wno-unused-macros -Wno-documentation-unknown-command -Wno-documentation -Wno-license-management -Wno-parentheses-equality -Wno-covered-switch-default -Wno-unreachable-code-break -I ../my_libs-I./RTE/_STM32L475-IC:/Users/Somaye/AppData/Local/Arm/Packs/ARM/CMSIS/5.7.0/CMSIS/Core/Include-IC:/Users/Somaye/AppData/Local/Arm/Packs/Keil/STM32L4xx_DFP/2.5.0/Drivers/CMSIS/Device/ST/STM32L4xx/Include-D__UVISION_VERSION="533" -D_RTE_ -DSTM32L475xx -D_RTE_-o ./objects/spi.o -MD)
-I (..\my_libs\spi.h)(0x6012CDEF)
-I (C:\Users\Somaye\AppData\Local\Arm\Packs\Keil\STM32L4xx_DFP\2.5.0\Drivers\CMSIS\Device\ST\STM32L4xx\Include\stm32l4xx.h)(0x5F731840)
-I (C:\Users\Somaye\AppData\Local\Arm\Packs\Keil\STM32L4xx_DFP\2.5.0\Drivers\CMSIS\Device\ST\STM32L4xx\Include\stm32l475xx.h)(0x5F731840)
-I (C:\Users\Somaye\AppData\Local\Arm\Packs\ARM\CMSIS\5.7.0\CMSIS\Core\Include\core_cm4.h)(0x5E8F2582)
-I (C:\Keil_v5\ARM\ARMCLANG\include\stdint.h)(0x5F373318)
-I (C:\Users\Somaye\AppData\Local\Arm\Packs\ARM\CMSIS\5.7.0\CMSIS\Core\Include\cmsis_version.h)(0x5E8F2582)
-I (C:\Users\Somaye\AppData\Local\Arm\Packs\ARM\CMSIS\5.7.0\CMSIS\Core\Include\cmsis_compiler.h)(0x5E835B22)
-I (C:\Users\Somaye\AppData\Local\Arm\Packs\ARM\CMSIS\5.7.0\CMSIS\Core\Include\cmsis_armclang.h)(0x5E8F2582)
-I (C:\Keil_v5\ARM\ARMCLANG\include\arm_compat.h)(0x5EE189B2)
-I (C:\Keil_v5\ARM\ARMCLANG\include\arm_acle.h)(0x5F26E9A8)
-I (C:\Users\Somaye\AppData\Local\Arm\Packs\ARM\CMSIS\5.7.0\CMSIS\Core\Include\mpu_armv7.h)(0x5E8F2582)
-I (C:\Users\Somaye\AppData\Local\Arm\Packs\Keil\STM32L4xx_DFP\2.5.0\Drivers\CMSIS\Device\ST\STM32L4xx\Include\system_stm32l4xx.h)(0x5F731840)
-I (..\my_libs\fcmd.h)(0x60130A3F)
-I (..\my_libs\uart.h)(0x60130E61)
-I (C:\Keil_v5\ARM\ARMCLANG\include\stdio.h)(0x5F373324)
-I (..\my_libs\Processes.h)(0x6013195B)
 I (C:\Keil_v5\ARM\ARMCLANG\include\stdlib.h)(0x5F37331E)
 I (C:\Keil_v5\ARM\ARMCLANG\include\stdarg.h)(0x5FEF86F1)
-F (..\my_libs\spi.h)(0x6012CDEF)()
-F (..\my_libs\wifi.c)(0x6017D72D)(-xc -std=c99 --target=arm-arm-none-eabi -mcpu=cortex-m4 -mfpu=fpv4-sp-d16 -mfloat-abi=hard -c-fno-rtti -funsigned-char -fshort-enums -fshort-wchar-D__EVAL -gdwarf-3 -Oz -ffunction-sections -Wno-packed -Wno-missing-variable-declarations -Wno-missing-prototypes -Wno-missing-noreturn -Wno-sign-conversion -Wno-nonportable-include-path -Wno-reserved-id-macro -Wno-unused-macros -Wno-documentation-unknown-command -Wno-documentation -Wno-license-management -Wno-parentheses-equality -Wno-covered-switch-default -Wno-unreachable-code-break -I ../my_libs-I./RTE/_STM32L475-IC:/Users/Somaye/AppData/Local/Arm/Packs/ARM/CMSIS/5.7.0/CMSIS/Core/Include-IC:/Users/Somaye/AppData/Local/Arm/Packs/Keil/STM32L4xx_DFP/2.5.0/Drivers/CMSIS/Device/ST/STM32L4xx/Include-D__UVISION_VERSION="533" -D_RTE_ -DSTM32L475xx -D_RTE_-o ./objects/wifi.o -MD)
-I (..\my_libs\wifi.h)(0x601345D7)
+I (C:\Keil_v5\ARM\ARMCLANG\include\string.h)(0x5F373314)
+I (..\Drivers\CMSIS\Device\ST\STM32L4xx\Include\stm32l4xx.h)(0x608D820A)
+I (..\Drivers\CMSIS\Device\ST\STM32L4xx\Include\stm32l475xx.h)(0x608D820A)
+I (..\Drivers\CMSIS\Include\core_cm4.h)(0x608D820A)
 I (C:\Keil_v5\ARM\ARMCLANG\include\stdint.h)(0x5F373318)
-I (..\my_libs\uart.h)(0x60130E61)
-I (C:\Users\Somaye\AppData\Local\Arm\Packs\Keil\STM32L4xx_DFP\2.5.0\Drivers\CMSIS\Device\ST\STM32L4xx\Include\stm32l4xx.h)(0x5F731840)
-I (C:\Users\Somaye\AppData\Local\Arm\Packs\Keil\STM32L4xx_DFP\2.5.0\Drivers\CMSIS\Device\ST\STM32L4xx\Include\stm32l475xx.h)(0x5F731840)
-I (C:\Users\Somaye\AppData\Local\Arm\Packs\ARM\CMSIS\5.7.0\CMSIS\Core\Include\core_cm4.h)(0x5E8F2582)
-I (C:\Users\Somaye\AppData\Local\Arm\Packs\ARM\CMSIS\5.7.0\CMSIS\Core\Include\cmsis_version.h)(0x5E8F2582)
-I (C:\Users\Somaye\AppData\Local\Arm\Packs\ARM\CMSIS\5.7.0\CMSIS\Core\Include\cmsis_compiler.h)(0x5E835B22)
-I (C:\Users\Somaye\AppData\Local\Arm\Packs\ARM\CMSIS\5.7.0\CMSIS\Core\Include\cmsis_armclang.h)(0x5E8F2582)
-I (C:\Keil_v5\ARM\ARMCLANG\include\arm_compat.h)(0x5EE189B2)
-I (C:\Keil_v5\ARM\ARMCLANG\include\arm_acle.h)(0x5F26E9A8)
-I (C:\Users\Somaye\AppData\Local\Arm\Packs\ARM\CMSIS\5.7.0\CMSIS\Core\Include\mpu_armv7.h)(0x5E8F2582)
-I (C:\Users\Somaye\AppData\Local\Arm\Packs\Keil\STM32L4xx_DFP\2.5.0\Drivers\CMSIS\Device\ST\STM32L4xx\Include\system_stm32l4xx.h)(0x5F731840)
-I (..\my_libs\fcmd.h)(0x60130A3F)
+I (..\Drivers\CMSIS\Include\core_cmInstr.h)(0x608D820A)
+I (..\Drivers\CMSIS\Include\cmsis_armcc_V6.h)(0x608D820A)
+I (..\Drivers\CMSIS\Include\core_cmFunc.h)(0x608D820A)
+I (..\Drivers\CMSIS\Include\core_cmSimd.h)(0x608D820A)
+I (..\Drivers\CMSIS\Device\ST\STM32L4xx\Include\system_stm32l4xx.h)(0x608D820A)
+I (..\Drivers\My_Drivers\Processes.h)(0x6096D463)
+I (..\Drivers\My_Drivers\uart.h)(0x60950E6D)
+I (..\Drivers\My_Drivers\gpio.h)(0x60950E77)
+I (ThirdParty\FreeRTOS\include\FreeRTOS.h)(0x6072BF40)
+I (C:\Keil_v5\ARM\ARMCLANG\include\stddef.h)(0x5F37331E)
+I (ThirdParty\FreeRTOS\include\FreeRTOSConfig.h)(0x60733452)
+I (ThirdParty\FreeRTOS\include\projdefs.h)(0x5FD90663)
+I (ThirdParty\FreeRTOS\include\portable.h)(0x5FD90663)
+I (ThirdParty\FreeRTOS\include\deprecated_definitions.h)(0x5FD90663)
+I (ThirdParty\FreeRTOS\portable\GCC\ARM_CM4F\portmacro.h)(0x5FD90663)
+I (ThirdParty\FreeRTOS\include\mpu_wrappers.h)(0x5FD90663)
+I (ThirdParty\FreeRTOS\include\task.h)(0x5FD90663)
+I (ThirdParty\FreeRTOS\include\list.h)(0x5FD90663)
+I (ThirdParty\FreeRTOS\include\timers.h)(0x5FD90663)
+I (ThirdParty\FreeRTOS\include\queue.h)(0x5FD90663)
+I (ThirdParty\FreeRTOS\include\semphr.h)(0x5FD90663)
+I (ThirdParty\FreeRTOS\include\event_groups.h)(0x5FD90663)
+F (..\Drivers\My_Drivers\fcmd.h)(0x6096D7A7)()
+F (.\ThirdParty\FreeRTOS\croutine.c)(0x5FD90663)(-xc -std=c99 --target=arm-arm-none-eabi -mcpu=cortex-m4 -mfpu=fpv4-sp-d16 -mfloat-abi=hard -c-fno-rtti -funsigned-char -fshort-enums -fshort-wchar-D__EVAL -gdwarf-3 -Oz -ffunction-sections -Wno-packed -Wno-missing-variable-declarations -Wno-missing-prototypes -Wno-missing-noreturn -Wno-sign-conversion -Wno-nonportable-include-path -Wno-reserved-id-macro -Wno-unused-macros -Wno-documentation-unknown-command -Wno-documentation -Wno-license-management -Wno-parentheses-equality -Wno-covered-switch-default -Wno-unreachable-code-break -I ../Commander -I ../Drivers/My_Drivers -I ../Drivers/CMSIS/Include -I ../Drivers/CMSIS/Device/ST/STM32L4xx/Include -I ../Drivers/STM32L4xx_HAL_Driver/Inc -I ./ThirdParty/FreeRTOS/include -I ./ThirdParty/FreeRTOS/portable/GCC/ARM_CM4F-IC:/Users/Somaye/AppData/Local/Arm/Packs/Keil/STM32L4xx_DFP/2.5.0/Drivers/CMSIS/Device/ST/STM32L4xx/Include-IC:/Keil_v5/ARM/CMSIS/Include-D__UVISION_VERSION="533" -DSTM32L475xx-o ./objects/croutine.o -MD)
+I (ThirdParty\FreeRTOS\include\FreeRTOS.h)(0x6072BF40)
+I (C:\Keil_v5\ARM\ARMCLANG\include\stddef.h)(0x5F37331E)
+I (C:\Keil_v5\ARM\ARMCLANG\include\stdint.h)(0x5F373318)
+I (ThirdParty\FreeRTOS\include\FreeRTOSConfig.h)(0x60733452)
+I (ThirdParty\FreeRTOS\include\projdefs.h)(0x5FD90663)
+I (ThirdParty\FreeRTOS\include\portable.h)(0x5FD90663)
+I (ThirdParty\FreeRTOS\include\deprecated_definitions.h)(0x5FD90663)
+I (ThirdParty\FreeRTOS\portable\GCC\ARM_CM4F\portmacro.h)(0x5FD90663)
+I (ThirdParty\FreeRTOS\include\mpu_wrappers.h)(0x5FD90663)
+I (ThirdParty\FreeRTOS\include\task.h)(0x5FD90663)
+I (ThirdParty\FreeRTOS\include\list.h)(0x5FD90663)
+I (ThirdParty\FreeRTOS\include\croutine.h)(0x5FD90663)
+F (.\ThirdParty\FreeRTOS\event_groups.c)(0x5FD90663)(-xc -std=c99 --target=arm-arm-none-eabi -mcpu=cortex-m4 -mfpu=fpv4-sp-d16 -mfloat-abi=hard -c-fno-rtti -funsigned-char -fshort-enums -fshort-wchar-D__EVAL -gdwarf-3 -Oz -ffunction-sections -Wno-packed -Wno-missing-variable-declarations -Wno-missing-prototypes -Wno-missing-noreturn -Wno-sign-conversion -Wno-nonportable-include-path -Wno-reserved-id-macro -Wno-unused-macros -Wno-documentation-unknown-command -Wno-documentation -Wno-license-management -Wno-parentheses-equality -Wno-covered-switch-default -Wno-unreachable-code-break -I ../Commander -I ../Drivers/My_Drivers -I ../Drivers/CMSIS/Include -I ../Drivers/CMSIS/Device/ST/STM32L4xx/Include -I ../Drivers/STM32L4xx_HAL_Driver/Inc -I ./ThirdParty/FreeRTOS/include -I ./ThirdParty/FreeRTOS/portable/GCC/ARM_CM4F-IC:/Users/Somaye/AppData/Local/Arm/Packs/Keil/STM32L4xx_DFP/2.5.0/Drivers/CMSIS/Device/ST/STM32L4xx/Include-IC:/Keil_v5/ARM/CMSIS/Include-D__UVISION_VERSION="533" -DSTM32L475xx-o ./objects/event_groups.o -MD)
+I (C:\Keil_v5\ARM\ARMCLANG\include\stdlib.h)(0x5F37331E)
+I (ThirdParty\FreeRTOS\include\FreeRTOS.h)(0x6072BF40)
+I (C:\Keil_v5\ARM\ARMCLANG\include\stddef.h)(0x5F37331E)
+I (C:\Keil_v5\ARM\ARMCLANG\include\stdint.h)(0x5F373318)
+I (ThirdParty\FreeRTOS\include\FreeRTOSConfig.h)(0x60733452)
+I (ThirdParty\FreeRTOS\include\projdefs.h)(0x5FD90663)
+I (ThirdParty\FreeRTOS\include\portable.h)(0x5FD90663)
+I (ThirdParty\FreeRTOS\include\deprecated_definitions.h)(0x5FD90663)
+I (ThirdParty\FreeRTOS\portable\GCC\ARM_CM4F\portmacro.h)(0x5FD90663)
+I (ThirdParty\FreeRTOS\include\mpu_wrappers.h)(0x5FD90663)
+I (ThirdParty\FreeRTOS\include\task.h)(0x5FD90663)
+I (ThirdParty\FreeRTOS\include\list.h)(0x5FD90663)
+I (ThirdParty\FreeRTOS\include\timers.h)(0x5FD90663)
+I (ThirdParty\FreeRTOS\include\event_groups.h)(0x5FD90663)
+F (.\ThirdParty\FreeRTOS\list.c)(0x5FD90663)(-xc -std=c99 --target=arm-arm-none-eabi -mcpu=cortex-m4 -mfpu=fpv4-sp-d16 -mfloat-abi=hard -c-fno-rtti -funsigned-char -fshort-enums -fshort-wchar-D__EVAL -gdwarf-3 -Oz -ffunction-sections -Wno-packed -Wno-missing-variable-declarations -Wno-missing-prototypes -Wno-missing-noreturn -Wno-sign-conversion -Wno-nonportable-include-path -Wno-reserved-id-macro -Wno-unused-macros -Wno-documentation-unknown-command -Wno-documentation -Wno-license-management -Wno-parentheses-equality -Wno-covered-switch-default -Wno-unreachable-code-break -I ../Commander -I ../Drivers/My_Drivers -I ../Drivers/CMSIS/Include -I ../Drivers/CMSIS/Device/ST/STM32L4xx/Include -I ../Drivers/STM32L4xx_HAL_Driver/Inc -I ./ThirdParty/FreeRTOS/include -I ./ThirdParty/FreeRTOS/portable/GCC/ARM_CM4F-IC:/Users/Somaye/AppData/Local/Arm/Packs/Keil/STM32L4xx_DFP/2.5.0/Drivers/CMSIS/Device/ST/STM32L4xx/Include-IC:/Keil_v5/ARM/CMSIS/Include-D__UVISION_VERSION="533" -DSTM32L475xx-o ./objects/list.o -MD)
+I (C:\Keil_v5\ARM\ARMCLANG\include\stdlib.h)(0x5F37331E)
+I (ThirdParty\FreeRTOS\include\FreeRTOS.h)(0x6072BF40)
+I (C:\Keil_v5\ARM\ARMCLANG\include\stddef.h)(0x5F37331E)
+I (C:\Keil_v5\ARM\ARMCLANG\include\stdint.h)(0x5F373318)
+I (ThirdParty\FreeRTOS\include\FreeRTOSConfig.h)(0x60733452)
+I (ThirdParty\FreeRTOS\include\projdefs.h)(0x5FD90663)
+I (ThirdParty\FreeRTOS\include\portable.h)(0x5FD90663)
+I (ThirdParty\FreeRTOS\include\deprecated_definitions.h)(0x5FD90663)
+I (ThirdParty\FreeRTOS\portable\GCC\ARM_CM4F\portmacro.h)(0x5FD90663)
+I (ThirdParty\FreeRTOS\include\mpu_wrappers.h)(0x5FD90663)
+I (ThirdParty\FreeRTOS\include\list.h)(0x5FD90663)
+F (.\ThirdParty\FreeRTOS\queue.c)(0x5FD90664)(-xc -std=c99 --target=arm-arm-none-eabi -mcpu=cortex-m4 -mfpu=fpv4-sp-d16 -mfloat-abi=hard -c-fno-rtti -funsigned-char -fshort-enums -fshort-wchar-D__EVAL -gdwarf-3 -Oz -ffunction-sections -Wno-packed -Wno-missing-variable-declarations -Wno-missing-prototypes -Wno-missing-noreturn -Wno-sign-conversion -Wno-nonportable-include-path -Wno-reserved-id-macro -Wno-unused-macros -Wno-documentation-unknown-command -Wno-documentation -Wno-license-management -Wno-parentheses-equality -Wno-covered-switch-default -Wno-unreachable-code-break -I ../Commander -I ../Drivers/My_Drivers -I ../Drivers/CMSIS/Include -I ../Drivers/CMSIS/Device/ST/STM32L4xx/Include -I ../Drivers/STM32L4xx_HAL_Driver/Inc -I ./ThirdParty/FreeRTOS/include -I ./ThirdParty/FreeRTOS/portable/GCC/ARM_CM4F-IC:/Users/Somaye/AppData/Local/Arm/Packs/Keil/STM32L4xx_DFP/2.5.0/Drivers/CMSIS/Device/ST/STM32L4xx/Include-IC:/Keil_v5/ARM/CMSIS/Include-D__UVISION_VERSION="533" -DSTM32L475xx-o ./objects/queue.o -MD)
+I (C:\Keil_v5\ARM\ARMCLANG\include\stdlib.h)(0x5F37331E)
+I (C:\Keil_v5\ARM\ARMCLANG\include\string.h)(0x5F373314)
+I (ThirdParty\FreeRTOS\include\FreeRTOS.h)(0x6072BF40)
+I (C:\Keil_v5\ARM\ARMCLANG\include\stddef.h)(0x5F37331E)
+I (C:\Keil_v5\ARM\ARMCLANG\include\stdint.h)(0x5F373318)
+I (ThirdParty\FreeRTOS\include\FreeRTOSConfig.h)(0x60733452)
+I (ThirdParty\FreeRTOS\include\projdefs.h)(0x5FD90663)
+I (ThirdParty\FreeRTOS\include\portable.h)(0x5FD90663)
+I (ThirdParty\FreeRTOS\include\deprecated_definitions.h)(0x5FD90663)
+I (ThirdParty\FreeRTOS\portable\GCC\ARM_CM4F\portmacro.h)(0x5FD90663)
+I (ThirdParty\FreeRTOS\include\mpu_wrappers.h)(0x5FD90663)
+I (ThirdParty\FreeRTOS\include\task.h)(0x5FD90663)
+I (ThirdParty\FreeRTOS\include\list.h)(0x5FD90663)
+I (ThirdParty\FreeRTOS\include\queue.h)(0x5FD90663)
+F (.\ThirdParty\FreeRTOS\stream_buffer.c)(0x5FD90664)(-xc -std=c99 --target=arm-arm-none-eabi -mcpu=cortex-m4 -mfpu=fpv4-sp-d16 -mfloat-abi=hard -c-fno-rtti -funsigned-char -fshort-enums -fshort-wchar-D__EVAL -gdwarf-3 -Oz -ffunction-sections -Wno-packed -Wno-missing-variable-declarations -Wno-missing-prototypes -Wno-missing-noreturn -Wno-sign-conversion -Wno-nonportable-include-path -Wno-reserved-id-macro -Wno-unused-macros -Wno-documentation-unknown-command -Wno-documentation -Wno-license-management -Wno-parentheses-equality -Wno-covered-switch-default -Wno-unreachable-code-break -I ../Commander -I ../Drivers/My_Drivers -I ../Drivers/CMSIS/Include -I ../Drivers/CMSIS/Device/ST/STM32L4xx/Include -I ../Drivers/STM32L4xx_HAL_Driver/Inc -I ./ThirdParty/FreeRTOS/include -I ./ThirdParty/FreeRTOS/portable/GCC/ARM_CM4F-IC:/Users/Somaye/AppData/Local/Arm/Packs/Keil/STM32L4xx_DFP/2.5.0/Drivers/CMSIS/Device/ST/STM32L4xx/Include-IC:/Keil_v5/ARM/CMSIS/Include-D__UVISION_VERSION="533" -DSTM32L475xx-o ./objects/stream_buffer.o -MD)
+I (C:\Keil_v5\ARM\ARMCLANG\include\stdint.h)(0x5F373318)
+I (C:\Keil_v5\ARM\ARMCLANG\include\string.h)(0x5F373314)
+I (ThirdParty\FreeRTOS\include\FreeRTOS.h)(0x6072BF40)
+I (C:\Keil_v5\ARM\ARMCLANG\include\stddef.h)(0x5F37331E)
+I (ThirdParty\FreeRTOS\include\FreeRTOSConfig.h)(0x60733452)
+I (ThirdParty\FreeRTOS\include\projdefs.h)(0x5FD90663)
+I (ThirdParty\FreeRTOS\include\portable.h)(0x5FD90663)
+I (ThirdParty\FreeRTOS\include\deprecated_definitions.h)(0x5FD90663)
+I (ThirdParty\FreeRTOS\portable\GCC\ARM_CM4F\portmacro.h)(0x5FD90663)
+I (ThirdParty\FreeRTOS\include\mpu_wrappers.h)(0x5FD90663)
+I (ThirdParty\FreeRTOS\include\task.h)(0x5FD90663)
+I (ThirdParty\FreeRTOS\include\list.h)(0x5FD90663)
+I (ThirdParty\FreeRTOS\include\stream_buffer.h)(0x5FD90663)
+F (.\ThirdParty\FreeRTOS\tasks.c)(0x5FD90664)(-xc -std=c99 --target=arm-arm-none-eabi -mcpu=cortex-m4 -mfpu=fpv4-sp-d16 -mfloat-abi=hard -c-fno-rtti -funsigned-char -fshort-enums -fshort-wchar-D__EVAL -gdwarf-3 -Oz -ffunction-sections -Wno-packed -Wno-missing-variable-declarations -Wno-missing-prototypes -Wno-missing-noreturn -Wno-sign-conversion -Wno-nonportable-include-path -Wno-reserved-id-macro -Wno-unused-macros -Wno-documentation-unknown-command -Wno-documentation -Wno-license-management -Wno-parentheses-equality -Wno-covered-switch-default -Wno-unreachable-code-break -I ../Commander -I ../Drivers/My_Drivers -I ../Drivers/CMSIS/Include -I ../Drivers/CMSIS/Device/ST/STM32L4xx/Include -I ../Drivers/STM32L4xx_HAL_Driver/Inc -I ./ThirdParty/FreeRTOS/include -I ./ThirdParty/FreeRTOS/portable/GCC/ARM_CM4F-IC:/Users/Somaye/AppData/Local/Arm/Packs/Keil/STM32L4xx_DFP/2.5.0/Drivers/CMSIS/Device/ST/STM32L4xx/Include-IC:/Keil_v5/ARM/CMSIS/Include-D__UVISION_VERSION="533" -DSTM32L475xx-o ./objects/tasks.o -MD)
+I (C:\Keil_v5\ARM\ARMCLANG\include\stdlib.h)(0x5F37331E)
+I (C:\Keil_v5\ARM\ARMCLANG\include\string.h)(0x5F373314)
+I (ThirdParty\FreeRTOS\include\FreeRTOS.h)(0x6072BF40)
+I (C:\Keil_v5\ARM\ARMCLANG\include\stddef.h)(0x5F37331E)
+I (C:\Keil_v5\ARM\ARMCLANG\include\stdint.h)(0x5F373318)
+I (ThirdParty\FreeRTOS\include\FreeRTOSConfig.h)(0x60733452)
+I (ThirdParty\FreeRTOS\include\projdefs.h)(0x5FD90663)
+I (ThirdParty\FreeRTOS\include\portable.h)(0x5FD90663)
+I (ThirdParty\FreeRTOS\include\deprecated_definitions.h)(0x5FD90663)
+I (ThirdParty\FreeRTOS\portable\GCC\ARM_CM4F\portmacro.h)(0x5FD90663)
+I (ThirdParty\FreeRTOS\include\mpu_wrappers.h)(0x5FD90663)
+I (ThirdParty\FreeRTOS\include\task.h)(0x5FD90663)
+I (ThirdParty\FreeRTOS\include\list.h)(0x5FD90663)
+I (ThirdParty\FreeRTOS\include\timers.h)(0x5FD90663)
+I (ThirdParty\FreeRTOS\include\stack_macros.h)(0x5FD90663)
+F (.\ThirdParty\FreeRTOS\timers.c)(0x5FD90664)(-xc -std=c99 --target=arm-arm-none-eabi -mcpu=cortex-m4 -mfpu=fpv4-sp-d16 -mfloat-abi=hard -c-fno-rtti -funsigned-char -fshort-enums -fshort-wchar-D__EVAL -gdwarf-3 -Oz -ffunction-sections -Wno-packed -Wno-missing-variable-declarations -Wno-missing-prototypes -Wno-missing-noreturn -Wno-sign-conversion -Wno-nonportable-include-path -Wno-reserved-id-macro -Wno-unused-macros -Wno-documentation-unknown-command -Wno-documentation -Wno-license-management -Wno-parentheses-equality -Wno-covered-switch-default -Wno-unreachable-code-break -I ../Commander -I ../Drivers/My_Drivers -I ../Drivers/CMSIS/Include -I ../Drivers/CMSIS/Device/ST/STM32L4xx/Include -I ../Drivers/STM32L4xx_HAL_Driver/Inc -I ./ThirdParty/FreeRTOS/include -I ./ThirdParty/FreeRTOS/portable/GCC/ARM_CM4F-IC:/Users/Somaye/AppData/Local/Arm/Packs/Keil/STM32L4xx_DFP/2.5.0/Drivers/CMSIS/Device/ST/STM32L4xx/Include-IC:/Keil_v5/ARM/CMSIS/Include-D__UVISION_VERSION="533" -DSTM32L475xx-o ./objects/timers.o -MD)
+I (C:\Keil_v5\ARM\ARMCLANG\include\stdlib.h)(0x5F37331E)
+I (ThirdParty\FreeRTOS\include\FreeRTOS.h)(0x6072BF40)
+I (C:\Keil_v5\ARM\ARMCLANG\include\stddef.h)(0x5F37331E)
+I (C:\Keil_v5\ARM\ARMCLANG\include\stdint.h)(0x5F373318)
+I (ThirdParty\FreeRTOS\include\FreeRTOSConfig.h)(0x60733452)
+I (ThirdParty\FreeRTOS\include\projdefs.h)(0x5FD90663)
+I (ThirdParty\FreeRTOS\include\portable.h)(0x5FD90663)
+I (ThirdParty\FreeRTOS\include\deprecated_definitions.h)(0x5FD90663)
+I (ThirdParty\FreeRTOS\portable\GCC\ARM_CM4F\portmacro.h)(0x5FD90663)
+I (ThirdParty\FreeRTOS\include\mpu_wrappers.h)(0x5FD90663)
+I (ThirdParty\FreeRTOS\include\task.h)(0x5FD90663)
+I (ThirdParty\FreeRTOS\include\list.h)(0x5FD90663)
+I (ThirdParty\FreeRTOS\include\queue.h)(0x5FD90663)
+I (ThirdParty\FreeRTOS\include\timers.h)(0x5FD90663)
+F (.\ThirdParty\FreeRTOS\portable\MemMang\heap_4.c)(0x5FD90663)(-xc -std=c99 --target=arm-arm-none-eabi -mcpu=cortex-m4 -mfpu=fpv4-sp-d16 -mfloat-abi=hard -c-fno-rtti -funsigned-char -fshort-enums -fshort-wchar-D__EVAL -gdwarf-3 -Oz -ffunction-sections -Wno-packed -Wno-missing-variable-declarations -Wno-missing-prototypes -Wno-missing-noreturn -Wno-sign-conversion -Wno-nonportable-include-path -Wno-reserved-id-macro -Wno-unused-macros -Wno-documentation-unknown-command -Wno-documentation -Wno-license-management -Wno-parentheses-equality -Wno-covered-switch-default -Wno-unreachable-code-break -I ../Commander -I ../Drivers/My_Drivers -I ../Drivers/CMSIS/Include -I ../Drivers/CMSIS/Device/ST/STM32L4xx/Include -I ../Drivers/STM32L4xx_HAL_Driver/Inc -I ./ThirdParty/FreeRTOS/include -I ./ThirdParty/FreeRTOS/portable/GCC/ARM_CM4F-IC:/Users/Somaye/AppData/Local/Arm/Packs/Keil/STM32L4xx_DFP/2.5.0/Drivers/CMSIS/Device/ST/STM32L4xx/Include-IC:/Keil_v5/ARM/CMSIS/Include-D__UVISION_VERSION="533" -DSTM32L475xx-o ./objects/heap_4.o -MD)
+I (C:\Keil_v5\ARM\ARMCLANG\include\stdlib.h)(0x5F37331E)
+I (ThirdParty\FreeRTOS\include\FreeRTOS.h)(0x6072BF40)
+I (C:\Keil_v5\ARM\ARMCLANG\include\stddef.h)(0x5F37331E)
+I (C:\Keil_v5\ARM\ARMCLANG\include\stdint.h)(0x5F373318)
+I (ThirdParty\FreeRTOS\include\FreeRTOSConfig.h)(0x60733452)
+I (ThirdParty\FreeRTOS\include\projdefs.h)(0x5FD90663)
+I (ThirdParty\FreeRTOS\include\portable.h)(0x5FD90663)
+I (ThirdParty\FreeRTOS\include\deprecated_definitions.h)(0x5FD90663)
+I (ThirdParty\FreeRTOS\portable\GCC\ARM_CM4F\portmacro.h)(0x5FD90663)
+I (ThirdParty\FreeRTOS\include\mpu_wrappers.h)(0x5FD90663)
+I (ThirdParty\FreeRTOS\include\task.h)(0x5FD90663)
+I (ThirdParty\FreeRTOS\include\list.h)(0x5FD90663)
+F (.\ThirdParty\FreeRTOS\portable\GCC\ARM_CM4F\port.c)(0x6072BBC4)(-xc -std=c99 --target=arm-arm-none-eabi -mcpu=cortex-m4 -mfpu=fpv4-sp-d16 -mfloat-abi=hard -c-fno-rtti -funsigned-char -fshort-enums -fshort-wchar-D__EVAL -gdwarf-3 -Oz -ffunction-sections -Wno-packed -Wno-missing-variable-declarations -Wno-missing-prototypes -Wno-missing-noreturn -Wno-sign-conversion -Wno-nonportable-include-path -Wno-reserved-id-macro -Wno-unused-macros -Wno-documentation-unknown-command -Wno-documentation -Wno-license-management -Wno-parentheses-equality -Wno-covered-switch-default -Wno-unreachable-code-break -I ../Commander -I ../Drivers/My_Drivers -I ../Drivers/CMSIS/Include -I ../Drivers/CMSIS/Device/ST/STM32L4xx/Include -I ../Drivers/STM32L4xx_HAL_Driver/Inc -I ./ThirdParty/FreeRTOS/include -I ./ThirdParty/FreeRTOS/portable/GCC/ARM_CM4F-IC:/Users/Somaye/AppData/Local/Arm/Packs/Keil/STM32L4xx_DFP/2.5.0/Drivers/CMSIS/Device/ST/STM32L4xx/Include-IC:/Keil_v5/ARM/CMSIS/Include-D__UVISION_VERSION="533" -DSTM32L475xx-o ./objects/port.o -MD)
+I (ThirdParty\FreeRTOS\include\FreeRTOS.h)(0x6072BF40)
+I (C:\Keil_v5\ARM\ARMCLANG\include\stddef.h)(0x5F37331E)
+I (C:\Keil_v5\ARM\ARMCLANG\include\stdint.h)(0x5F373318)
+I (ThirdParty\FreeRTOS\include\FreeRTOSConfig.h)(0x60733452)
+I (ThirdParty\FreeRTOS\include\projdefs.h)(0x5FD90663)
+I (ThirdParty\FreeRTOS\include\portable.h)(0x5FD90663)
+I (ThirdParty\FreeRTOS\include\deprecated_definitions.h)(0x5FD90663)
+I (ThirdParty\FreeRTOS\portable\GCC\ARM_CM4F\portmacro.h)(0x5FD90663)
+I (ThirdParty\FreeRTOS\include\mpu_wrappers.h)(0x5FD90663)
+I (ThirdParty\FreeRTOS\include\task.h)(0x5FD90663)
+I (ThirdParty\FreeRTOS\include\list.h)(0x5FD90663)
+I (..\Drivers\CMSIS\Device\ST\STM32L4xx\Include\stm32l4xx.h)(0x608D820A)
+I (..\Drivers\CMSIS\Device\ST\STM32L4xx\Include\stm32l475xx.h)(0x608D820A)
+I (..\Drivers\CMSIS\Include\core_cm4.h)(0x608D820A)
+I (..\Drivers\CMSIS\Include\core_cmInstr.h)(0x608D820A)
+I (..\Drivers\CMSIS\Include\cmsis_armcc_V6.h)(0x608D820A)
+I (..\Drivers\CMSIS\Include\core_cmFunc.h)(0x608D820A)
+I (..\Drivers\CMSIS\Include\core_cmSimd.h)(0x608D820A)
+I (..\Drivers\CMSIS\Device\ST\STM32L4xx\Include\system_stm32l4xx.h)(0x608D820A)
+F (.\ThirdParty\FreeRTOS\include\FreeRTOSConfig.h)(0x60733452)()
+F (..\Drivers\My_Drivers\Processes.c)(0x6096DB2E)(-xc -std=c99 --target=arm-arm-none-eabi -mcpu=cortex-m4 -mfpu=fpv4-sp-d16 -mfloat-abi=hard -c-fno-rtti -funsigned-char -fshort-enums -fshort-wchar-D__EVAL -gdwarf-3 -Oz -ffunction-sections -Wno-packed -Wno-missing-variable-declarations -Wno-missing-prototypes -Wno-missing-noreturn -Wno-sign-conversion -Wno-nonportable-include-path -Wno-reserved-id-macro -Wno-unused-macros -Wno-documentation-unknown-command -Wno-documentation -Wno-license-management -Wno-parentheses-equality -Wno-covered-switch-default -Wno-unreachable-code-break -I ../Commander -I ../Drivers/My_Drivers -I ../Drivers/CMSIS/Include -I ../Drivers/CMSIS/Device/ST/STM32L4xx/Include -I ../Drivers/STM32L4xx_HAL_Driver/Inc -I ./ThirdParty/FreeRTOS/include -I ./ThirdParty/FreeRTOS/portable/GCC/ARM_CM4F-IC:/Users/Somaye/AppData/Local/Arm/Packs/Keil/STM32L4xx_DFP/2.5.0/Drivers/CMSIS/Device/ST/STM32L4xx/Include-IC:/Keil_v5/ARM/CMSIS/Include-D__UVISION_VERSION="533" -DSTM32L475xx-o ./objects/processes.o -MD)
+I (..\Commander\main.h)(0x6096DB2E)
 I (C:\Keil_v5\ARM\ARMCLANG\include\stdio.h)(0x5F373324)
-I (..\my_libs\wifi_cmds.h)(0x60130A3E)
-I (..\my_libs\Processes.h)(0x6013195B)
-F (..\my_libs\wifi.h)(0x601345D7)()
-F (..\my_libs\wifi_cmds.h)(0x60130A3E)()
-F (..\my_libs\i2c.c)(0x6017F31E)(-xc -std=c99 --target=arm-arm-none-eabi -mcpu=cortex-m4 -mfpu=fpv4-sp-d16 -mfloat-abi=hard -c-fno-rtti -funsigned-char -fshort-enums -fshort-wchar-D__EVAL -gdwarf-3 -Oz -ffunction-sections -Wno-packed -Wno-missing-variable-declarations -Wno-missing-prototypes -Wno-missing-noreturn -Wno-sign-conversion -Wno-nonportable-include-path -Wno-reserved-id-macro -Wno-unused-macros -Wno-documentation-unknown-command -Wno-documentation -Wno-license-management -Wno-parentheses-equality -Wno-covered-switch-default -Wno-unreachable-code-break -I ../my_libs-I./RTE/_STM32L475-IC:/Users/Somaye/AppData/Local/Arm/Packs/ARM/CMSIS/5.7.0/CMSIS/Core/Include-IC:/Users/Somaye/AppData/Local/Arm/Packs/Keil/STM32L4xx_DFP/2.5.0/Drivers/CMSIS/Device/ST/STM32L4xx/Include-D__UVISION_VERSION="533" -D_RTE_ -DSTM32L475xx -D_RTE_-o ./objects/i2c.o -MD)
-I (..\my_libs\i2c.h)(0x6017F31E)
-I (C:\Users\Somaye\AppData\Local\Arm\Packs\Keil\STM32L4xx_DFP\2.5.0\Drivers\CMSIS\Device\ST\STM32L4xx\Include\stm32l4xx.h)(0x5F731840)
-I (C:\Users\Somaye\AppData\Local\Arm\Packs\Keil\STM32L4xx_DFP\2.5.0\Drivers\CMSIS\Device\ST\STM32L4xx\Include\stm32l475xx.h)(0x5F731840)
-I (C:\Users\Somaye\AppData\Local\Arm\Packs\ARM\CMSIS\5.7.0\CMSIS\Core\Include\core_cm4.h)(0x5E8F2582)
+I (C:\Keil_v5\ARM\ARMCLANG\include\stdlib.h)(0x5F37331E)
+I (C:\Keil_v5\ARM\ARMCLANG\include\stdarg.h)(0x5FEF86F1)
+I (C:\Keil_v5\ARM\ARMCLANG\include\string.h)(0x5F373314)
+I (..\Drivers\CMSIS\Device\ST\STM32L4xx\Include\stm32l4xx.h)(0x608D820A)
+I (..\Drivers\CMSIS\Device\ST\STM32L4xx\Include\stm32l475xx.h)(0x608D820A)
+I (..\Drivers\CMSIS\Include\core_cm4.h)(0x608D820A)
 I (C:\Keil_v5\ARM\ARMCLANG\include\stdint.h)(0x5F373318)
-I (C:\Users\Somaye\AppData\Local\Arm\Packs\ARM\CMSIS\5.7.0\CMSIS\Core\Include\cmsis_version.h)(0x5E8F2582)
-I (C:\Users\Somaye\AppData\Local\Arm\Packs\ARM\CMSIS\5.7.0\CMSIS\Core\Include\cmsis_compiler.h)(0x5E835B22)
-I (C:\Users\Somaye\AppData\Local\Arm\Packs\ARM\CMSIS\5.7.0\CMSIS\Core\Include\cmsis_armclang.h)(0x5E8F2582)
-I (C:\Keil_v5\ARM\ARMCLANG\include\arm_compat.h)(0x5EE189B2)
-I (C:\Keil_v5\ARM\ARMCLANG\include\arm_acle.h)(0x5F26E9A8)
-I (C:\Users\Somaye\AppData\Local\Arm\Packs\ARM\CMSIS\5.7.0\CMSIS\Core\Include\mpu_armv7.h)(0x5E8F2582)
-I (C:\Users\Somaye\AppData\Local\Arm\Packs\Keil\STM32L4xx_DFP\2.5.0\Drivers\CMSIS\Device\ST\STM32L4xx\Include\system_stm32l4xx.h)(0x5F731840)
-I (..\my_libs\fcmd.h)(0x60130A3F)
+I (..\Drivers\CMSIS\Include\core_cmInstr.h)(0x608D820A)
+I (..\Drivers\CMSIS\Include\cmsis_armcc_V6.h)(0x608D820A)
+I (..\Drivers\CMSIS\Include\core_cmFunc.h)(0x608D820A)
+I (..\Drivers\CMSIS\Include\core_cmSimd.h)(0x608D820A)
+I (..\Drivers\CMSIS\Device\ST\STM32L4xx\Include\system_stm32l4xx.h)(0x608D820A)
+I (..\Drivers\My_Drivers\fcmd.h)(0x6096D7A7)
+I (..\Drivers\My_Drivers\Processes.h)(0x6096D463)
+I (..\Drivers\My_Drivers\uart.h)(0x60950E6D)
+I (..\Drivers\My_Drivers\gpio.h)(0x60950E77)
+I (ThirdParty\FreeRTOS\include\FreeRTOS.h)(0x6072BF40)
+I (C:\Keil_v5\ARM\ARMCLANG\include\stddef.h)(0x5F37331E)
+I (ThirdParty\FreeRTOS\include\FreeRTOSConfig.h)(0x60733452)
+I (ThirdParty\FreeRTOS\include\projdefs.h)(0x5FD90663)
+I (ThirdParty\FreeRTOS\include\portable.h)(0x5FD90663)
+I (ThirdParty\FreeRTOS\include\deprecated_definitions.h)(0x5FD90663)
+I (ThirdParty\FreeRTOS\portable\GCC\ARM_CM4F\portmacro.h)(0x5FD90663)
+I (ThirdParty\FreeRTOS\include\mpu_wrappers.h)(0x5FD90663)
+I (ThirdParty\FreeRTOS\include\task.h)(0x5FD90663)
+I (ThirdParty\FreeRTOS\include\list.h)(0x5FD90663)
+I (ThirdParty\FreeRTOS\include\timers.h)(0x5FD90663)
+I (ThirdParty\FreeRTOS\include\queue.h)(0x5FD90663)
+I (ThirdParty\FreeRTOS\include\semphr.h)(0x5FD90663)
+I (ThirdParty\FreeRTOS\include\event_groups.h)(0x5FD90663)
+F (..\Drivers\My_Drivers\Processes.h)(0x6096D463)()
+F (..\Drivers\My_Drivers\uart.c)(0x60130E29)(-xc -std=c99 --target=arm-arm-none-eabi -mcpu=cortex-m4 -mfpu=fpv4-sp-d16 -mfloat-abi=hard -c-fno-rtti -funsigned-char -fshort-enums -fshort-wchar-D__EVAL -gdwarf-3 -Oz -ffunction-sections -Wno-packed -Wno-missing-variable-declarations -Wno-missing-prototypes -Wno-missing-noreturn -Wno-sign-conversion -Wno-nonportable-include-path -Wno-reserved-id-macro -Wno-unused-macros -Wno-documentation-unknown-command -Wno-documentation -Wno-license-management -Wno-parentheses-equality -Wno-covered-switch-default -Wno-unreachable-code-break -I ../Commander -I ../Drivers/My_Drivers -I ../Drivers/CMSIS/Include -I ../Drivers/CMSIS/Device/ST/STM32L4xx/Include -I ../Drivers/STM32L4xx_HAL_Driver/Inc -I ./ThirdParty/FreeRTOS/include -I ./ThirdParty/FreeRTOS/portable/GCC/ARM_CM4F-IC:/Users/Somaye/AppData/Local/Arm/Packs/Keil/STM32L4xx_DFP/2.5.0/Drivers/CMSIS/Device/ST/STM32L4xx/Include-IC:/Keil_v5/ARM/CMSIS/Include-D__UVISION_VERSION="533" -DSTM32L475xx-o ./objects/uart.o -MD)
+I (..\Drivers\My_Drivers\uart.h)(0x60950E6D)
+I (..\Commander\main.h)(0x6096DB2E)
 I (C:\Keil_v5\ARM\ARMCLANG\include\stdio.h)(0x5F373324)
-F (..\my_libs\i2c.h)(0x6017F31E)()
-F (RTE\Device\STM32L475VGTx\startup_stm32l475xx.s)(0x5FCD387C)(--target=arm-arm-none-eabi -mcpu=cortex-m4 -mfpu=fpv4-sp-d16 -mfloat-abi=hard -masm=auto -c-gdwarf-3 -Wa,armasm,--pd,"__EVAL SETA 1"-I./RTE/_STM32L475-IC:/Users/Somaye/AppData/Local/Arm/Packs/ARM/CMSIS/5.7.0/CMSIS/Core/Include-IC:/Users/Somaye/AppData/Local/Arm/Packs/Keil/STM32L4xx_DFP/2.5.0/Drivers/CMSIS/Device/ST/STM32L4xx/Include-Wa,armasm,--pd,"__UVISION_VERSION SETA 533" -Wa,armasm,--pd,"_RTE_ SETA 1" -Wa,armasm,--pd,"STM32L475xx SETA 1" -Wa,armasm,--pd,"_RTE_ SETA 1"-o ./objects/startup_stm32l475xx.o)
-F (RTE\Device\STM32L475VGTx\system_stm32l4xx.c)(0x5DEE6064)(-xc -std=c99 --target=arm-arm-none-eabi -mcpu=cortex-m4 -mfpu=fpv4-sp-d16 -mfloat-abi=hard -c-fno-rtti -funsigned-char -fshort-enums -fshort-wchar-D__EVAL -gdwarf-3 -Oz -ffunction-sections -Wno-packed -Wno-missing-variable-declarations -Wno-missing-prototypes -Wno-missing-noreturn -Wno-sign-conversion -Wno-nonportable-include-path -Wno-reserved-id-macro -Wno-unused-macros -Wno-documentation-unknown-command -Wno-documentation -Wno-license-management -Wno-parentheses-equality -Wno-covered-switch-default -Wno-unreachable-code-break -I ../my_libs-I./RTE/_STM32L475-IC:/Users/Somaye/AppData/Local/Arm/Packs/ARM/CMSIS/5.7.0/CMSIS/Core/Include-IC:/Users/Somaye/AppData/Local/Arm/Packs/Keil/STM32L4xx_DFP/2.5.0/Drivers/CMSIS/Device/ST/STM32L4xx/Include-D__UVISION_VERSION="533" -D_RTE_ -DSTM32L475xx -D_RTE_-o ./objects/system_stm32l4xx.o -MD)
-I (C:\Users\Somaye\AppData\Local\Arm\Packs\Keil\STM32L4xx_DFP\2.5.0\Drivers\CMSIS\Device\ST\STM32L4xx\Include\stm32l4xx.h)(0x5F731840)
-I (C:\Users\Somaye\AppData\Local\Arm\Packs\Keil\STM32L4xx_DFP\2.5.0\Drivers\CMSIS\Device\ST\STM32L4xx\Include\stm32l475xx.h)(0x5F731840)
-I (C:\Users\Somaye\AppData\Local\Arm\Packs\ARM\CMSIS\5.7.0\CMSIS\Core\Include\core_cm4.h)(0x5E8F2582)
+I (C:\Keil_v5\ARM\ARMCLANG\include\stdlib.h)(0x5F37331E)
+I (C:\Keil_v5\ARM\ARMCLANG\include\stdarg.h)(0x5FEF86F1)
+I (C:\Keil_v5\ARM\ARMCLANG\include\string.h)(0x5F373314)
+I (..\Drivers\CMSIS\Device\ST\STM32L4xx\Include\stm32l4xx.h)(0x608D820A)
+I (..\Drivers\CMSIS\Device\ST\STM32L4xx\Include\stm32l475xx.h)(0x608D820A)
+I (..\Drivers\CMSIS\Include\core_cm4.h)(0x608D820A)
 I (C:\Keil_v5\ARM\ARMCLANG\include\stdint.h)(0x5F373318)
-I (C:\Users\Somaye\AppData\Local\Arm\Packs\ARM\CMSIS\5.7.0\CMSIS\Core\Include\cmsis_version.h)(0x5E8F2582)
-I (C:\Users\Somaye\AppData\Local\Arm\Packs\ARM\CMSIS\5.7.0\CMSIS\Core\Include\cmsis_compiler.h)(0x5E835B22)
-I (C:\Users\Somaye\AppData\Local\Arm\Packs\ARM\CMSIS\5.7.0\CMSIS\Core\Include\cmsis_armclang.h)(0x5E8F2582)
-I (C:\Keil_v5\ARM\ARMCLANG\include\arm_compat.h)(0x5EE189B2)
-I (C:\Keil_v5\ARM\ARMCLANG\include\arm_acle.h)(0x5F26E9A8)
-I (C:\Users\Somaye\AppData\Local\Arm\Packs\ARM\CMSIS\5.7.0\CMSIS\Core\Include\mpu_armv7.h)(0x5E8F2582)
-I (C:\Users\Somaye\AppData\Local\Arm\Packs\Keil\STM32L4xx_DFP\2.5.0\Drivers\CMSIS\Device\ST\STM32L4xx\Include\system_stm32l4xx.h)(0x5F731840)
+I (..\Drivers\CMSIS\Include\core_cmInstr.h)(0x608D820A)
+I (..\Drivers\CMSIS\Include\cmsis_armcc_V6.h)(0x608D820A)
+I (..\Drivers\CMSIS\Include\core_cmFunc.h)(0x608D820A)
+I (..\Drivers\CMSIS\Include\core_cmSimd.h)(0x608D820A)
+I (..\Drivers\CMSIS\Device\ST\STM32L4xx\Include\system_stm32l4xx.h)(0x608D820A)
+I (..\Drivers\My_Drivers\fcmd.h)(0x6096D7A7)
+I (..\Drivers\My_Drivers\Processes.h)(0x6096D463)
+I (..\Drivers\My_Drivers\gpio.h)(0x60950E77)
+I (ThirdParty\FreeRTOS\include\FreeRTOS.h)(0x6072BF40)
+I (C:\Keil_v5\ARM\ARMCLANG\include\stddef.h)(0x5F37331E)
+I (ThirdParty\FreeRTOS\include\FreeRTOSConfig.h)(0x60733452)
+I (ThirdParty\FreeRTOS\include\projdefs.h)(0x5FD90663)
+I (ThirdParty\FreeRTOS\include\portable.h)(0x5FD90663)
+I (ThirdParty\FreeRTOS\include\deprecated_definitions.h)(0x5FD90663)
+I (ThirdParty\FreeRTOS\portable\GCC\ARM_CM4F\portmacro.h)(0x5FD90663)
+I (ThirdParty\FreeRTOS\include\mpu_wrappers.h)(0x5FD90663)
+I (ThirdParty\FreeRTOS\include\task.h)(0x5FD90663)
+I (ThirdParty\FreeRTOS\include\list.h)(0x5FD90663)
+I (ThirdParty\FreeRTOS\include\timers.h)(0x5FD90663)
+I (ThirdParty\FreeRTOS\include\queue.h)(0x5FD90663)
+I (ThirdParty\FreeRTOS\include\semphr.h)(0x5FD90663)
+I (ThirdParty\FreeRTOS\include\event_groups.h)(0x5FD90663)
+F (..\Drivers\My_Drivers\uart.h)(0x60950E6D)()
+F (..\Drivers\My_Drivers\gpio.c)(0x60903950)(-xc -std=c99 --target=arm-arm-none-eabi -mcpu=cortex-m4 -mfpu=fpv4-sp-d16 -mfloat-abi=hard -c-fno-rtti -funsigned-char -fshort-enums -fshort-wchar-D__EVAL -gdwarf-3 -Oz -ffunction-sections -Wno-packed -Wno-missing-variable-declarations -Wno-missing-prototypes -Wno-missing-noreturn -Wno-sign-conversion -Wno-nonportable-include-path -Wno-reserved-id-macro -Wno-unused-macros -Wno-documentation-unknown-command -Wno-documentation -Wno-license-management -Wno-parentheses-equality -Wno-covered-switch-default -Wno-unreachable-code-break -I ../Commander -I ../Drivers/My_Drivers -I ../Drivers/CMSIS/Include -I ../Drivers/CMSIS/Device/ST/STM32L4xx/Include -I ../Drivers/STM32L4xx_HAL_Driver/Inc -I ./ThirdParty/FreeRTOS/include -I ./ThirdParty/FreeRTOS/portable/GCC/ARM_CM4F-IC:/Users/Somaye/AppData/Local/Arm/Packs/Keil/STM32L4xx_DFP/2.5.0/Drivers/CMSIS/Device/ST/STM32L4xx/Include-IC:/Keil_v5/ARM/CMSIS/Include-D__UVISION_VERSION="533" -DSTM32L475xx-o ./objects/gpio.o -MD)
+I (..\Drivers\My_Drivers\Gpio.h)(0x60950E77)
+I (..\Commander\main.h)(0x6096DB2E)
+I (C:\Keil_v5\ARM\ARMCLANG\include\stdio.h)(0x5F373324)
+I (C:\Keil_v5\ARM\ARMCLANG\include\stdlib.h)(0x5F37331E)
+I (C:\Keil_v5\ARM\ARMCLANG\include\stdarg.h)(0x5FEF86F1)
+I (C:\Keil_v5\ARM\ARMCLANG\include\string.h)(0x5F373314)
+I (..\Drivers\CMSIS\Device\ST\STM32L4xx\Include\stm32l4xx.h)(0x608D820A)
+I (..\Drivers\CMSIS\Device\ST\STM32L4xx\Include\stm32l475xx.h)(0x608D820A)
+I (..\Drivers\CMSIS\Include\core_cm4.h)(0x608D820A)
+I (C:\Keil_v5\ARM\ARMCLANG\include\stdint.h)(0x5F373318)
+I (..\Drivers\CMSIS\Include\core_cmInstr.h)(0x608D820A)
+I (..\Drivers\CMSIS\Include\cmsis_armcc_V6.h)(0x608D820A)
+I (..\Drivers\CMSIS\Include\core_cmFunc.h)(0x608D820A)
+I (..\Drivers\CMSIS\Include\core_cmSimd.h)(0x608D820A)
+I (..\Drivers\CMSIS\Device\ST\STM32L4xx\Include\system_stm32l4xx.h)(0x608D820A)
+I (..\Drivers\My_Drivers\fcmd.h)(0x6096D7A7)
+I (..\Drivers\My_Drivers\Processes.h)(0x6096D463)
+I (..\Drivers\My_Drivers\uart.h)(0x60950E6D)
+I (ThirdParty\FreeRTOS\include\FreeRTOS.h)(0x6072BF40)
+I (C:\Keil_v5\ARM\ARMCLANG\include\stddef.h)(0x5F37331E)
+I (ThirdParty\FreeRTOS\include\FreeRTOSConfig.h)(0x60733452)
+I (ThirdParty\FreeRTOS\include\projdefs.h)(0x5FD90663)
+I (ThirdParty\FreeRTOS\include\portable.h)(0x5FD90663)
+I (ThirdParty\FreeRTOS\include\deprecated_definitions.h)(0x5FD90663)
+I (ThirdParty\FreeRTOS\portable\GCC\ARM_CM4F\portmacro.h)(0x5FD90663)
+I (ThirdParty\FreeRTOS\include\mpu_wrappers.h)(0x5FD90663)
+I (ThirdParty\FreeRTOS\include\task.h)(0x5FD90663)
+I (ThirdParty\FreeRTOS\include\list.h)(0x5FD90663)
+I (ThirdParty\FreeRTOS\include\timers.h)(0x5FD90663)
+I (ThirdParty\FreeRTOS\include\queue.h)(0x5FD90663)
+I (ThirdParty\FreeRTOS\include\semphr.h)(0x5FD90663)
+I (ThirdParty\FreeRTOS\include\event_groups.h)(0x5FD90663)
+F (..\Drivers\My_Drivers\gpio.h)(0x60950E77)()
+F (.\bsp.c)(0x60950ADF)(-xc -std=c99 --target=arm-arm-none-eabi -mcpu=cortex-m4 -mfpu=fpv4-sp-d16 -mfloat-abi=hard -c-fno-rtti -funsigned-char -fshort-enums -fshort-wchar-D__EVAL -gdwarf-3 -Oz -ffunction-sections -Wno-packed -Wno-missing-variable-declarations -Wno-missing-prototypes -Wno-missing-noreturn -Wno-sign-conversion -Wno-nonportable-include-path -Wno-reserved-id-macro -Wno-unused-macros -Wno-documentation-unknown-command -Wno-documentation -Wno-license-management -Wno-parentheses-equality -Wno-covered-switch-default -Wno-unreachable-code-break -I ../Commander -I ../Drivers/My_Drivers -I ../Drivers/CMSIS/Include -I ../Drivers/CMSIS/Device/ST/STM32L4xx/Include -I ../Drivers/STM32L4xx_HAL_Driver/Inc -I ./ThirdParty/FreeRTOS/include -I ./ThirdParty/FreeRTOS/portable/GCC/ARM_CM4F-IC:/Users/Somaye/AppData/Local/Arm/Packs/Keil/STM32L4xx_DFP/2.5.0/Drivers/CMSIS/Device/ST/STM32L4xx/Include-IC:/Keil_v5/ARM/CMSIS/Include-D__UVISION_VERSION="533" -DSTM32L475xx-o ./objects/bsp.o -MD)
+F (.\bsp.h)(0x60950E81)()
+F (.\startup_stm32l475xx.s)(0x6092DC50)(--target=arm-arm-none-eabi -mcpu=cortex-m4 -mfpu=fpv4-sp-d16 -mfloat-abi=hard -masm=auto -c-gdwarf-3 -Wa,armasm,--pd,"__EVAL SETA 1"-IC:/Users/Somaye/AppData/Local/Arm/Packs/Keil/STM32L4xx_DFP/2.5.0/Drivers/CMSIS/Device/ST/STM32L4xx/Include-IC:/Keil_v5/ARM/CMSIS/Include-Wa,armasm,--pd,"__UVISION_VERSION SETA 533" -Wa,armasm,--pd,"STM32L475xx SETA 1"-o ./objects/startup_stm32l475xx.o)
+F (..\Drivers\CMSIS\system_stm32l4xx.c)(0x608D820A)(-xc -std=c99 --target=arm-arm-none-eabi -mcpu=cortex-m4 -mfpu=fpv4-sp-d16 -mfloat-abi=hard -c-fno-rtti -funsigned-char -fshort-enums -fshort-wchar-D__EVAL -gdwarf-3 -Oz -ffunction-sections -Wno-packed -Wno-missing-variable-declarations -Wno-missing-prototypes -Wno-missing-noreturn -Wno-sign-conversion -Wno-nonportable-include-path -Wno-reserved-id-macro -Wno-unused-macros -Wno-documentation-unknown-command -Wno-documentation -Wno-license-management -Wno-parentheses-equality -Wno-covered-switch-default -Wno-unreachable-code-break -I ../Commander -I ../Drivers/My_Drivers -I ../Drivers/CMSIS/Include -I ../Drivers/CMSIS/Device/ST/STM32L4xx/Include -I ../Drivers/STM32L4xx_HAL_Driver/Inc -I ./ThirdParty/FreeRTOS/include -I ./ThirdParty/FreeRTOS/portable/GCC/ARM_CM4F-IC:/Users/Somaye/AppData/Local/Arm/Packs/Keil/STM32L4xx_DFP/2.5.0/Drivers/CMSIS/Device/ST/STM32L4xx/Include-IC:/Keil_v5/ARM/CMSIS/Include-D__UVISION_VERSION="533" -DSTM32L475xx-o ./objects/system_stm32l4xx.o -MD)
+I (..\Drivers\CMSIS\Device\ST\STM32L4xx\Include\stm32l4xx.h)(0x608D820A)
+I (..\Drivers\CMSIS\Device\ST\STM32L4xx\Include\stm32l475xx.h)(0x608D820A)
+I (..\Drivers\CMSIS\Include\core_cm4.h)(0x608D820A)
+I (C:\Keil_v5\ARM\ARMCLANG\include\stdint.h)(0x5F373318)
+I (..\Drivers\CMSIS\Include\core_cmInstr.h)(0x608D820A)
+I (..\Drivers\CMSIS\Include\cmsis_armcc_V6.h)(0x608D820A)
+I (..\Drivers\CMSIS\Include\core_cmFunc.h)(0x608D820A)
+I (..\Drivers\CMSIS\Include\core_cmSimd.h)(0x608D820A)
+I (..\Drivers\CMSIS\Device\ST\STM32L4xx\Include\system_stm32l4xx.h)(0x608D820A)
+F (..\Drivers\My_Drivers\stm32l4xx_hal_conf.h)(0x6093C4B9)()

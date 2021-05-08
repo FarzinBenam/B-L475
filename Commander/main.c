@@ -23,20 +23,20 @@
 	*          Date 	| Subject			| Detail
 	*    ==========================================================================
 	*			2015-12-12	| First Code	| Start recoding the Shell of Commander for General uses
-	*			2016-04-01	| Add_cmd			| Process mode changed (Details in Proccess.c)
-	*			2020-06-20	|	ARM					| ARM Integration Cortex M4
+	*			2016-04-01	| Add_cmd		| Process mode changed (Details in Proccess.c)
+	*			2020-06-20	|	ARM			| ARM Integration Cortex M4
 	*			2020-07-21	| WiFi init		| Wifi modude initiated through SPI3
-	*			2020-12-04  | SysTick			| SysTick added
-	*			2021-01-03	| WiFi 				| WiFi interface through uart added
-	*			2021-01-26  | Git					| started Git logging
+	*			2020-12-04  | SysTick		| SysTick added
+	*			2021-01-03	| WiFi 			| WiFi interface through uart added
+	*			2021-01-26  | Git			| started Git logging
 	*******************************************************************************/
 /* Includes ------------------------------------------------------------------*/
-#include "stm32l4xx.h"                  // Device header
-#include "../my_libs/fcmd.h"
-#include "../my_libs/Processes.h"
-#include "../my_libs/wifi.h"
-#include "../my_libs/wifi_cmds.h"
-#include "../my_libs/i2c.h"
+#include "fcmd.h"
+
+
+
+
+
 //************************************************************************
 //* Specific Variable Definitions
 //************************************************************************
@@ -62,28 +62,56 @@ volatile uint8_t CmdStatus = 0;
 volatile uint8_t WifiStatus = 0;
 volatile uint8_t wificmdStatus = 0;
 
+TaskHandle_t *const led1TaskHandle;
+TaskHandle_t *const led2TaskHandle;
+TaskHandle_t *const send1TaskHandle;
+TaskHandle_t *const send2TaskHandle;
+TaskHandle_t *const CmderStatusPollHandle;
+TaskHandle_t *const TimeTerminalHandle;
+
+
+// create mutex handle
+SemaphoreHandle_t uartMutex;
+SemaphoreHandle_t CmdStatusMutex;
 
 
 int main (void)
 {
-  
-	OsInits ();
-  
-  
-  //WIFI_Connect(AT_SET_USER_SSID, AT_SET_USER_PASSPHRASE, 0x03);
-  
-  i2c_peripheral_enable(I2C2);
-  
-  
+    OsInits ();
+
+    //WIFI_Connect(AT_SET_USER_SSID, AT_SET_USER_PASSPHRASE, 0x03);
+    
+    
+    
+    
+    // create mutex
+    uartMutex = xSemaphoreCreateMutex();
+    CmdStatusMutex = xSemaphoreCreateMutex();
+
+
+    xTaskCreate(led1Task,   NULL, 128, NULL, tskIDLE_PRIORITY, led1TaskHandle);
+    xTaskCreate(led2Task,   NULL, 128, NULL, tskIDLE_PRIORITY, led2TaskHandle);
+    //xTaskCreate(send1Task,  NULL, 128, NULL, tskIDLE_PRIORITY, send1TaskHandle);
+    //xTaskCreate(send2Task,  NULL, 128, NULL, tskIDLE_PRIORITY, send2TaskHandle);  
+    xTaskCreate(CmderStatusPoll, NULL, 500, NULL, tskIDLE_PRIORITY, CmderStatusPollHandle);
+    //xTaskCreate(TimeTerminal, NULL, 500, NULL, tskIDLE_PRIORITY, TimeTerminalHandle);
+
+    vTaskStartScheduler();        /* Start scheduler */
+    
+    
+    
 	while(1)
 	{
-
-		if (CmdStatus == 1)	USART_Process();
-		if (CmdStatus == 2)	cmd_entry();
-		if (wificmdStatus) WiFi();
+        
+        // Program should never reach here!!!
 
 	}
 }
+/* ---------------------------------------------------------------------------*/
+
+
+/* ---------------------------------------------------------------------------*/
+
 
 
  /******************* (C) COPYRIGHT 2020 Farzin_M.Benam *****END OF FILE****/
