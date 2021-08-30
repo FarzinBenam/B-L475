@@ -1,0 +1,80 @@
+# - stm32l4 standard library
+./Libraries/STM32L4_V1.17.0
+
+# - Commander project
+Commander
+
+#
+RegisterConfigs
+
+# unnesessary files and folders
+B-L475E-IOT01/
+DebugConfig/
+help/
+RTE/
+Commander/
+tests/
+STM32L4_V1.17.0/
+
+
+#keil files
+*.scvd
+*.FS
+*.user20
+*.uvprojx
+*.vuoptx
+*.lst
+
+##############################################################
+# Prerequisites
+*.d
+
+# Object files
+*.o
+*.ko
+*.obj
+*.elf
+
+# Linker output
+*.ilk
+*.map
+*.exp
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Libraries
+*.lib
+*.a
+*.la
+*.lo
+
+# Shared objects (inc. Windows DLLs)
+*.dll
+*.so
+*.so.*
+*.dylib
+
+# Executables
+*.exe
+*.out
+*.app
+*.i*86
+*.x86_64
+*.hex
+
+# Debug files
+*.dSYM/
+*.su
+*.idb
+*.pdb
+
+# Kernel Module Compile Results
+*.mod*
+*.cmd
+.tmp_versions/
+modules.order
+Module.symvers
+Mkfile.old
+dkms.conf
