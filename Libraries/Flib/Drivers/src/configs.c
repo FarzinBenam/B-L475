@@ -1,11 +1,20 @@
 /* Includes ------------------------------------------------------------------*/
 #include "Configs.h"
 
+/* Exported constants --------------------------------------------------------*/
+
 /* Private define ------------------------------------------------------------*/
+
+
+
+
+
 /**
  *  @brief HTS221 Slave address
  */
-static void     bsp_config (void);
+static void   bsp_config	(void);
+static void		crc_init8		(void);
+static void		crc_init32	(void);
 
 
 
@@ -27,16 +36,21 @@ uint8_t Configs (void)
   //_bsp_clk_freq_get();
   i2c_config();
   qspi_config();
+	rtc_config();
   
   
   
   /* Componentefs Inits  -------------------------------------------------------*/
   HTS221_T_Init(HTS221_SLAVE_ADD);
-  HTS221_T_ReadTemp(HTS221_SLAVE_ADD);
+	HTS221_H_Init(HTS221_SLAVE_ADD);
+  
   
   
   //__enable_irq();
-  terminal("\n\nWelcome! \n");
+	nl(4);
+	terminal("_____________________\n");
+	time_show();
+  terminal("\nWelcome! \n_____________________\n");
   return 0;
 }
 
@@ -189,14 +203,98 @@ static void  bsp_config (void)
     LL_USART_Init (COM_usart, &USART_InitStruct);
     /* USART1 Enable */
     LL_USART_Enable(COM_usart);
-  #endif
-  terminal("\n\n\n\n\n\n__________________\n");
-  
-
-  
+  #endif 
 
 }
 /* ==============   BOARD SPECIFIC CONFIGURATION CODE END      ============== */
+void	rtc_config		(void)
+{
+	LL_RTC_InitTypeDef rtc_init;
+	
+	
+	RCC->APB1ENR1 |= (1 << 10); 			// Bit 10 RTCAPBEN: RTC APB clock enable
+	RCC->APB1ENR1 |= RCC_APB1ENR1_PWREN;				// Bit 28 PWREN: Power interface clock enable
+	
+  PWR->CR1	|= (1<<8);							// Bit 8 DBP: Disable backup domain write protection
+	RCC->BDCR |= RCC_BDCR_LSEON;			// Bit 0 LSEON: LSE oscillator enable
+	RCC->BDCR |= RCC_BDCR_RTCSEL_0;		// Bits 9:8 RTCSEL[1:0]: RTC clock source selection
+	RCC->BDCR &= ~RCC_BDCR_RTCSEL_1;	// Bits 9:8 RTCSEL[1:0]: RTC clock source selection
+	RCC->BDCR |= RCC_BDCR_RTCEN;			// Bit 15 RTCEN: RTC clock enable 
+		
+
+	LL_RTC_StructInit(&rtc_init);
+	LL_RTC_Init(RTC, &rtc_init);
+	
+	//time_set();
+	
+	
+}
+
+
+uint8_t	crc_8bit (uint8_t * buffer, uint8_t length)
+{
+	volatile uint8_t i, temp;
+	
+	crc_init8();
+	
+	for(i = 0; i < length; i++){
+		CRC->DR = buffer[i];
+	}
+	temp = CRC->DR;
+	
+	RCC->AHB1ENR &= ~RCC_AHB1ENR_CRCEN;
+	return temp;
+}
+void	time_set	(void)
+{
+	LL_RTC_TimeTypeDef time;
+	LL_RTC_DateTypeDef date;
+	
+	time.Hours = 1;
+	time.Minutes = 27;
+	
+	date.Year = 21;
+	date.Month = LL_RTC_MONTH_SEPTEMBER;
+	date.Day = 17;
+	date.WeekDay =  LL_RTC_WEEKDAY_FRIDAY;
+	
+	LL_RTC_TIME_Init(RTC, LL_RTC_FORMAT_BIN, &time);
+	LL_RTC_DATE_Init(RTC, LL_RTC_FORMAT_BIN, &date);
+}
+void	time_show		(void)
+{
+	LL_RTC_TimeTypeDef	time;
+	LL_RTC_DateTypeDef	date;
+	
+	time_read(&time, &date);
+	
+	terminal("\n%.2X:%.2X:%.2X ",time.Hours, time.Minutes, time.Seconds);
+	terminal("__20%.2X-%.2X-%.2X", date.Year, date.Month, date.Day);
+	if(RTC->TR & RTC_TR_PM) terminal("PM");
+
+}
+void	time_read (LL_RTC_TimeTypeDef	*time, LL_RTC_DateTypeDef	*date)
+{
+	rtc_time_params timeparams;
+	rtc_date_params dateparams;
+	uint32_t *ptr;
+	
+	
+	ptr = &timeparams;	/* store address of timeparam in pointer variable*/
+	*ptr = RTC->TR;			/* store the value to the pointing address */
+	
+	time->Seconds = timeparams.second;
+	time->Minutes = timeparams.minute;
+	time->Hours = timeparams.hour;
+	
+	ptr = &dateparams; /* store address of dateparam in pointer variable*/
+	*ptr = RTC->DR;
+	
+	date->Day = dateparams.Day;
+	date->Month = dateparams.month;
+	date->WeekDay = dateparams.weekday;
+	date->Year = dateparams.year;
+}
 void  i2c_config (void)
 {
   LL_I2C_InitTypeDef    I2C_InitStruct;
@@ -410,7 +508,31 @@ void  sensor_write (uint16_t DeviceAddr, uint8_t RegisterAddr, uint8_t *tmp)
 
 }
 
+void	nl	(uint8_t line)
+{
+	uint8_t i;
+	for(i = 0; i < line; i++){
+		terminal("\n");
+	}
+}
+static void	crc_init8	(void)
+{
+	RCC->AHB1ENR |= RCC_AHB1ENR_CRCEN;
+	
+	CRC->CR  |= CRC_CR_RESET;             // Reset calculation
+	CRC->POL  = 0xCB;                     // pick a random poly
+	CRC->CR   = 2 << CRC_CR_POLYSIZE_Pos;	// set poly to 8 bit
+	CRC->INIT = 0xFF; 
+}
+static void	crc_init32	(void)
+{
+	RCC->AHB1ENR |= RCC_AHB1ENR_CRCEN;
 
+	CRC->CR  |= CRC_CR_RESET;							// Reset calculation
+	CRC->POL  = 0x04C11DB7U;							// Default 32 bit poly
+	CRC->CR   = 0x00000000;       				// sets poly size to 32 bit
+	CRC->INIT = 0xFFFFFFFF;								//32 bit init value
+}
 /**
   * @brief  Set HTS221 temperature sensor Initialization.
   * @param  DeviceAddr: I2C device address
@@ -478,15 +600,16 @@ float HTS221_T_ReadTemp (uint16_t DeviceAddr)
   T_out = (((uint16_t)buffer[1]) << 8) | (uint16_t)buffer[0];
 
   tmp_f = (float)(T_out - T0_out) * (float)(T1_degC - T0_degC) / (float)(T1_out - T0_out)  +  T0_degC;
-//  terminal("\nT0_degC: %d",T0_degC);
-//  terminal("\nT1_degC: %d",T1_degC);
-//  terminal("\n");
-//  terminal("\nT0_out: %d",T0_out);
-//  terminal("\nT1_out: %d",T1_out);
-//  terminal("\n");
-//  terminal("\nT_out:   %d",T_out);
-//  terminal("\n");
-  
+/*  terminal("\nT0_degC: %d",T0_degC);
+ terminal("\nT1_degC: %d",T1_degC);
+ terminal("\n");
+ terminal("\nT0_out: %d",T0_out);
+ terminal("\nT1_out: %d",T1_out);
+ terminal("\n");
+ terminal("\nT_out:   %d",T_out);
+ terminal("\n");
+ */
+	//terminal("\nTemperature:%f",tmp_f);
   return tmp_f;
 }
 
@@ -552,8 +675,11 @@ float HTS221_H_ReadHumidity(uint16_t DeviceAddr)
   tmp_f = ( tmp_f > 1000.0f ) ? 1000.0f
         : ( tmp_f <    0.0f ) ?    0.0f
         : tmp_f;
-
-  return (tmp_f / 10.0f);
+				
+				
+	tmp_f /= 10.0f;
+	//terminal("\nHumdity:%f",tmp_f);
+  return tmp_f;
 }
 
 

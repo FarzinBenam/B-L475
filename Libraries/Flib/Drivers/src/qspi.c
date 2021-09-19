@@ -229,7 +229,7 @@ void  qspi_EraseSector(uint32_t EraseStartAddress, uint32_t EraseEndAddress)
 	}
 }
 
-void  qspi_WriteMemory(uint8_t* buffer, uint32_t address,uint32_t buffer_size)
+void  qspi_WriteMemory(uint8_t* buffer, uint32_t address, uint32_t buffer_size)
 {
 
 	QSPI_CommandTypeDef sCommand;

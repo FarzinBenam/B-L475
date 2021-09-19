@@ -11,8 +11,8 @@
 
 /* Configurations    ---------------------------------------------------------*/
 #define rtos            0
-#define COM             1               // usart1 used to communicate with COM port
-#define hc_05           0              // uart4 used if the hc-05 ble module used
+#define COM             1               // usart1 used to communicate with COM port1
+#define hc_05           0								// uart4 used if the hc-05 ble module used
 #define systick         1               // use RTC for systick
 #define qspi_debug      0
 
@@ -69,7 +69,14 @@
  *******************************************************************************/
 uint8_t Configs (void);
 
-void    i2c_config (void);
+void    i2c_config	(void);
+void		rtc_config	(void);
+
+void		time_set		(void);
+void		time_show		(void);
+void		time_read		(LL_RTC_TimeTypeDef	*time, LL_RTC_DateTypeDef	*date);
+
+uint8_t	crc_8bit 		(uint8_t *buffer, uint8_t length);
 
 void    _bsp_clk_freq_get (void);
 void    i2c2_read (uint8_t SADD, uint8_t ReadADD, uint32_t TransferSize, uint8_t *buffer);
@@ -86,7 +93,7 @@ void    HTS221_H_Init(uint16_t DeviceAddr);
 float   HTS221_H_ReadHumidity(uint16_t DeviceAddr);
 
 
-
+void	nl	(uint8_t line);
 
 
 #endif

@@ -21,7 +21,7 @@ STM32L4_V1.17.0/
 *.scvd
 *.FS
 *.user20
-*.uvprojx
+*.uvoptx
 *.vuoptx
 *.lst
 

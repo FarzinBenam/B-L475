@@ -38,7 +38,7 @@
 //#include "stm32l4xx_ll_adc.h"
 //#include "stm32l4xx_ll_comp.h"
 #include "stm32l4xx_ll_cortex.h"
-//#include "stm32l4xx_ll_crc.h"
+#include "stm32l4xx_ll_crc.h"
 //#include "stm32l4xx_ll_dac.h"
 //#include "stm32l4xx_ll_dma.h"
 #include "stm32l4xx_ll_i2c.h"
@@ -47,7 +47,7 @@
 //#include "stm32l4xx_ll_lpuart.h"
 //#include "stm32l4xx_ll_opamp.h"
 //#include "stm32l4xx_ll_rng.h"
-//#include "stm32l4xx_ll_rtc.h"
+#include "stm32l4xx_ll_rtc.h"
 #include "stm32l4xx_ll_spi.h"
 //#include "stm32l4xx_ll_swpmi.h"
 //#include "stm32l4xx_ll_tim.h"
@@ -67,7 +67,27 @@
 #endif /* USE_FULL_ASSERT */
 
 /* Exported types ------------------------------------------------------------*/
-/* Exported constants --------------------------------------------------------*/
+/* define a structure for RTC_TR register with bit fields */
+typedef struct{
+	uint32_t second		:7;
+	uint32_t reserved1:1;
+	uint32_t minute		:7;
+	uint32_t reserved2:1;
+	uint32_t hour			:6;
+	uint32_t ampm			:1;
+	uint32_t reserved3:9;
+}rtc_time_params;
+
+/* define a structure for RTC_DR register with bit fields */
+typedef struct{
+	uint32_t Day			:6;
+	uint32_t reserved1:2;
+	uint32_t month		:5;
+	uint32_t weekday	:3;
+	uint32_t year			:8;
+	uint32_t reserved2:8;
+}rtc_date_params;
+
 
 /* ==============   BOARD SPECIFIC CONFIGURATION CODE BEGIN    ============== */
 /**

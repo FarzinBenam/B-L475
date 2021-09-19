@@ -30,14 +30,24 @@
 	*			2021-01-03	| WiFi        | WiFi interface through uart added
 	*			2021-01-26  | Git         | started Git logging
   *     2021.08.01  | LL_Driver   | ST Low-Level Drivers used
+	*			2021.08.20	| Quad-spi		| started
+	*			2021.09.02	| Log FS			| started
 	*******************************************************************************/
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 
 /* Private typedef -----------------------------------------------------------*/
+/* Exported constants --------------------------------------------------------*/
+const char	_TEMPERATURE_HUMIDITY_FOLDER_NAME[] = "T & H";
+const char	start_tag[] = "*_";
+const char	end_tag[] = "`!";
 /* Private define ------------------------------------------------------------*/
+
 /* Private macro -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
+/* Constant definitions ------------------------------------------------------*/
+
+
 /*
 Global status variable
 	CmdStatus = 0 -> normal status
@@ -63,89 +73,65 @@ volatile uint32_t tick;
 int main(void)
 {
   /* Private variables ---------------------------------------------------------*/
-  uint8_t buf[] = "How is the weather inside that chip, Farzin?!";
-  uint8_t temp[100];
-  _fs_init_def fs;
-  _fs_folder_def fsfolder;
+  uint8_t		buf[] = "How is the weather inside that chip, Farzin?!";
+  uint8_t		temp[2000];
+	char			buf1[50];
+	char			buf2[3];
+  uint32_t	address;
+	uint32_t	temp1;
+	volatile	uint8_t i;
+	
+	
+	
+  fs_folder_def fsfolder;
+	LL_RTC_TimeTypeDef time;
+	LL_RTC_DateTypeDef date;
   /* Configuration functions ---------------------------------------------------*/
   Configs();
-  
-  
-  /*----------------------------------------------------------------------------*/
-  // test
-  qspi_ReadMemory(temp, QSPI_START_ADDRESS, 10);
+	
+	
+//	terminal("\nchip erase started");
+//	time_show();
+//	qspi_Erase_Chip();
+//	terminal("\nchip erase ended");
+//	time_show();
+//	qspi_EraseSector(0x8000, 0x10000);
 
-  if(temp[0] == 0xFF){
-    qspi_WriteMemory(buf, QSPI_START_ADDRESS, sizeof(buf));
-    terminal("\naddress:0x%X written!", QSPI_START_ADDRESS);
-  }
-  /*----------------------------------------------------------------------------*/
-  
-  
-  
-  
-  
-  
-  
-  //qspi_WriteMemory(buf, 100, sizeof(buf));
-  
-//  qspi_ReadMemory(temp, 100, 50);
-//  terminal("\n%s",temp);
-//  
-//  terminal("\nT: %.2f C", HTS221_T_ReadTemp(HTS221_SLAVE_ADD));
-//  terminal("  H: %.2f %%", HTS221_H_ReadHumidity(HTS221_SLAVE_ADD));
-  
-  
-  
-  strcpy(fsfolder.Name, "T & H"); // be carefull with the size of array
-  strcpy(fsfolder.Commant, "the folder used for stroing the temperature and Humidity logs");
-  fsfolder.FolderSize = 40000;
-  _fs_new_folder(fsfolder);
-  
-  
-  
-  fs.buffer[0] = (uint8_t) (HTS221_T_ReadTemp(HTS221_SLAVE_ADD));
-  fs.buffer[1] = (uint8_t) (HTS221_H_ReadHumidity(HTS221_SLAVE_ADD));
-  _fs_log(fs);
-  
+  T_H_log_init(&fsfolder);
+
+
+
+
+
+//	qspi_ReadMemory(temp, QSPI_START_ADDRESS, MX25R6435F_SECTOR_SIZE);
+//	terminal("\nAddress 0x%X Read:\n", QSPI_START_ADDRESS);
+//		for(int k = 0; k < MX25R6435F_SECTOR_SIZE; ){
+//			terminal("%.2X ", temp[k++]);
+//			if((k % 24) == 0){
+//				terminal("_________%X:\n", k);
+//			}
+//		}
+
   while (1)
   {
   
-//    LED1_ON();
-//    LL_mDelay(LED_BLINK_FAST);
-//    LED1_OFF();
-//    LL_mDelay(LED_BLINK_FAST);
-//    
-//    LED2_ON();
-//    LL_mDelay(LED_BLINK_FAST);
-//    LED2_OFF();
-//    LL_mDelay(LED_BLINK_FAST);
+//		LED1_ON();
+//		LL_mDelay(LED_BLINK_SLOW);
+//		LED1_OFF();
+//		LL_mDelay(LED_BLINK_SLOW);
 
-    
-    
+//		LED2_ON();
+//		LL_mDelay(LED_BLINK_SLOW);
+//		LED2_OFF();
+//		LL_mDelay(LED_BLINK_SLOW); 
+
+		T_H_log(&fsfolder);
+		
+		
+//		LL_mDelay(2000);
   }
 }
 
 
-
-#ifdef  USE_FULL_ASSERT
-/**
-  * @brief  Reports the name of the source file and the source line number
-  *         where the assert_param error has occurred.
-  * @param  file: pointer to the source file name
-  * @param  line: assert_param error line source number
-  * @retval None
-  */
-void assert_failed(uint8_t *file, uint32_t line)
-{
-  /* User can add his own implementation to report the file name and line number,
-     ex: printf("Wrong parameters value: file %s on line %d", file, line) */
-
-  /* Infinite loop */
-  while (1)
-  {
-  }
-}
-#endif
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
