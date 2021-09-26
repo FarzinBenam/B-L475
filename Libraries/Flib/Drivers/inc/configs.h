@@ -11,10 +11,10 @@
 
 /* Configurations    ---------------------------------------------------------*/
 #define rtos            0
-#define COM             1               // usart1 used to communicate with COM port1
-#define hc_05           0								// uart4 used if the hc-05 ble module used
+#define COM             0               // usart1 used to communicate with COM port1
+#define hc_05           1								// uart4 used if the hc-05 ble module used
 #define systick         1               // use RTC for systick
-#define qspi_debug      0
+#define qspi_debug      1
 
 
 //#define F_CPU           SystemCoreClock
@@ -25,7 +25,6 @@
 #define HTS221_SLAVE_ADD    0xBE
 #define I2C_MEM_ADD_LSB     (__ADDRESS__)              ((uint8_t)((uint16_t)((__ADDRESS__) & (uint16_t)(0x00FFU))))
 #define HTS221_BIT(x) ((uint8_t)x)
-
 /* Private constants ---------------------------------------------------------*/
 //////////////////////////////////////////////////////////////////////
 #if (COM == 0) && (hc_05 == 0)
@@ -69,31 +68,23 @@
  *******************************************************************************/
 uint8_t Configs (void);
 
-void    i2c_config	(void);
-void		rtc_config	(void);
+/* ==============   I2C2 SPECIFI FUNCTIONS         ========================== */
+void    i2c2_read									(uint8_t SADD, uint8_t ReadADD, uint32_t TransferSize, uint8_t *buffer);
+void    i2c2_write								(uint8_t SADD, uint8_t WriteADD, uint32_t TransferSize, uint8_t *buffer);
+uint8_t i2c2_sensor_read					(uint16_t DeviceAddr, uint8_t RegisterAddr);
+void    i2c2_sensor_write					(uint16_t DeviceAddr, uint8_t RegisterAddr, uint8_t *tmp);
+void    i2c2_sensor_readmultiple	(uint16_t DeviceAddr, uint8_t RegisterAddr, uint8_t *buffer, uint8_t readsize);
 
-void		time_set		(void);
+/* ==============   Time Functions      ===================================== */
 void		time_show		(void);
 void		time_read		(LL_RTC_TimeTypeDef	*time, LL_RTC_DateTypeDef	*date);
 
+/* ==============   CRC Functions      ====================================== */
 uint8_t	crc_8bit 		(uint8_t *buffer, uint8_t length);
 
-void    _bsp_clk_freq_get (void);
-void    i2c2_read (uint8_t SADD, uint8_t ReadADD, uint32_t TransferSize, uint8_t *buffer);
-void    i2c2_write (uint8_t SADD, uint8_t WriteADD, uint32_t TransferSize, uint8_t *buffer);
-
-uint8_t sensor_read (uint16_t DeviceAddr, uint8_t RegisterAddr);
-void    sensor_write (uint16_t DeviceAddr, uint8_t RegisterAddr, uint8_t *tmp);
-void    sensor_readmultiple (uint16_t DeviceAddr, uint8_t RegisterAddr, uint8_t *buffer, uint8_t readsize);
-
-void    HTS221_T_Init(uint16_t DeviceAddr);
-float   HTS221_T_ReadTemp(uint16_t DeviceAddr);
-
-void    HTS221_H_Init(uint16_t DeviceAddr);
-float   HTS221_H_ReadHumidity(uint16_t DeviceAddr);
-
-
-void	nl	(uint8_t line);
+/* ==============   General Functions  ====================================== */
+void		_bsp_clk_freq_get (void);
+void		nl					(uint8_t line);
 
 
 #endif

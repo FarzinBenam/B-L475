@@ -22,18 +22,13 @@
 /* Includes ------------------------------------------------------------------*/
 #include "../inc/stm32l4xx_it.h"
 
-/** @addtogroup STM32L4xx_LL_Examples
-  * @{
-  */
 
-/** @addtogroup Templates_LL
-  * @{
-  */
 
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
 /* Private macro -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
+extern volatile uint8_t	CmdStatus;
 
 /* Private function prototypes -----------------------------------------------*/
 /* Private functions ---------------------------------------------------------*/
@@ -185,6 +180,28 @@ void I2C2_EV_IRQHandler(void)
 void I2C2_ER_IRQHandler(void)
 {
   terminal("\nI2C2_ER_IRQHandler");
+}
+
+
+
+void	USART1_IRQHandler		(void)
+{
+//	terminal("\n\rim at USART1_IRQHandler");
+	CmdStatus = 1;
+	USART1->RQR |= (1<<3);
+}
+void	USART3_IRQHandler		(void)
+{
+  terminal("\n\rim at USART3_IRQHandler");
+//	wificmdStatus = 1;
+//	USART3->RQR |= (1<<3);
+}
+void    UART4_IRQHandler        (void)
+{
+  //terminal("\n\rim at UART4_IRQHandler");
+  //LED1_PORT->ODR ^= LED1_PIN;
+  CmdStatus = 1;
+  UART4->RQR |= (1<<3);
 }
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

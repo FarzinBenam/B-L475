@@ -41,6 +41,7 @@
 const char	_TEMPERATURE_HUMIDITY_FOLDER_NAME[] = "T & H";
 const char	start_tag[] = "*_";
 const char	end_tag[] = "`!";
+const char	_Error[] = "ERROR: ";
 /* Private define ------------------------------------------------------------*/
 
 /* Private macro -------------------------------------------------------------*/
@@ -64,7 +65,7 @@ Global status variable
 	wificmdStatus = 1 -> wifi interrupt recieved
 	*/
 volatile uint8_t CmdStatus = 0;
-//volatile uint8_t WifiStatus = 0;
+volatile uint8_t WifiStatus = 0;
 //volatile uint8_t wificmdStatus = 0;
 volatile uint32_t tick;
 
@@ -73,48 +74,33 @@ volatile uint32_t tick;
 int main(void)
 {
   /* Private variables ---------------------------------------------------------*/
-  uint8_t		buf[] = "How is the weather inside that chip, Farzin?!";
-  uint8_t		temp[2000];
-	char			buf1[50];
-	char			buf2[3];
-  uint32_t	address;
-	uint32_t	temp1;
-	volatile	uint8_t i;
-	
-	
-	
   fs_folder_def fsfolder;
-	LL_RTC_TimeTypeDef time;
-	LL_RTC_DateTypeDef date;
+	
   /* Configuration functions ---------------------------------------------------*/
   Configs();
 	
 	
-//	terminal("\nchip erase started");
-//	time_show();
-//	qspi_Erase_Chip();
-//	terminal("\nchip erase ended");
-//	time_show();
-//	qspi_EraseSector(0x8000, 0x10000);
+
+	//qspi_EraseSector(0x8000, 0x10000);
+	//qspi_Erase_Chip();
 
   T_H_log_init(&fsfolder);
 
 
 
+	while(1){
+		if (CmdStatus == 1) USART_Process();
+    if (CmdStatus == 2)	cmd_entry();
+    //if (wificmdStatus)  WiFi();
+		
+		T_H_log(&fsfolder);
+		LL_mDelay(2000);
+	}
 
 
-//	qspi_ReadMemory(temp, QSPI_START_ADDRESS, MX25R6435F_SECTOR_SIZE);
-//	terminal("\nAddress 0x%X Read:\n", QSPI_START_ADDRESS);
-//		for(int k = 0; k < MX25R6435F_SECTOR_SIZE; ){
-//			terminal("%.2X ", temp[k++]);
-//			if((k % 24) == 0){
-//				terminal("_________%X:\n", k);
-//			}
-//		}
-
-  while (1)
-  {
-  
+//  while (1)
+//  {
+//  
 //		LED1_ON();
 //		LL_mDelay(LED_BLINK_SLOW);
 //		LED1_OFF();
@@ -125,11 +111,11 @@ int main(void)
 //		LED2_OFF();
 //		LL_mDelay(LED_BLINK_SLOW); 
 
-		T_H_log(&fsfolder);
-		
-		
+//		T_H_log(&fsfolder);
+//		
+//		
 //		LL_mDelay(2000);
-  }
+//  }
 }
 
 

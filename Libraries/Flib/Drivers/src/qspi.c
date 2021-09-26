@@ -11,12 +11,19 @@
 #include "qspi.h"
 
 /* Private define ------------------------------------------------------------*/
+extern const char	_Error[];
 /** @defgroup QSPI_Private_Constants QSPI Private Constants
   * @{
   */
 #define MEMORY_SECTOR_SIZE                  MX25R6435F_SECTOR_SIZE
 #define MEMORY_PAGE_SIZE                    MX25R6435F_PAGE_SIZE
+#define QSPI_TIMEOUT												500
 
+#define QSPI_QUAD_DISABLE       0x0
+#define QSPI_QUAD_ENABLE        0x1
+
+#define QSPI_HIGH_PERF_DISABLE  0x0
+#define QSPI_HIGH_PERF_ENABLE   0x1
 
 #define QSPI_FUNCTIONAL_MODE_INDIRECT_WRITE 0x00000000U                     /*!<Indirect write mode*/
 #define QSPI_FUNCTIONAL_MODE_INDIRECT_READ  ((uint32_t)QUADSPI_CCR_FMODE_0) /*!<Indirect read mode*/
@@ -30,41 +37,82 @@
 
 
 /* Private function prototypes -----------------------------------------------*/
-static void MX_QUADSPI_Init (void);
-static void qspi_ResetChip (void);
+static uint8_t qspi_Init(QSPI_InitTypeDef *Init);
+static uint8_t qspi_ResetMemory (void);
 static void QSPI_Config(QSPI_CommandTypeDef *cmd, uint32_t FunctionalMode);
 static void qspi_gpio_Init (void);
-static void mx_qspi_Init (void);
 static void qspi_Configuration (void);
-static void qspi_AutoPollingMemReady (void);
-static void qspi_AutoPolling (QSPI_CommandTypeDef *cmd, QSPI_AutoPollingTypeDef *cfg);
+static uint8_t qspi_AutoPollingMemReady (void);
+static uint8_t qspi_AutoPolling (QSPI_CommandTypeDef *cmd, QSPI_AutoPollingTypeDef *cfg);
 static void qspi_Read_All_Reg (uint8_t* test_buffer);
-static void qspi_Abort (void);
-static void qspi_WriteEnable(void);
-static void qspi_Command (QSPI_CommandTypeDef *cmd);
-static void qspi_Transmit (uint8_t *pData);
-static void qspi_Receive (uint8_t *pData);
+static uint8_t qspi_Abort (void);
+static uint8_t qspi_WriteEnable(void);
+static uint8_t qspi_Command (QSPI_CommandTypeDef *cmd);
+static uint8_t qspi_Transmit (uint8_t *pData);
+static uint8_t qspi_Receive (uint8_t *pData);
+static uint8_t qspi_WaitFlagStateUntilTimeout(__IO uint32_t Register, uint32_t Flag, FlagStatus State, uint32_t Timeout);
+static uint8_t qspi_QuadMode(uint8_t Operation);
+static uint8_t qspi_HighPerfMode(uint8_t Operation);
 
 /*******************************************************************************
  * QUADSPI Functions
  *******************************************************************************/
  /* QUADSPI init function */
-void  qspi_config (void)
+ErrorStatus  qspi_config (void)
 {
-  /* (1) Enables GPIO clock and confige the QPSI pins ************************/
-  qspi_gpio_Init ();
-  /* (2) Enable the QSPI peripheral clock *************************************/
-	mx_qspi_Init();
-  /* (3) QSPI_ResetChip session  **********************************************/
-  qspi_ResetChip();
-  
-  LL_mDelay(10);
-  
-  qspi_AutoPollingMemReady();
+	ErrorStatus status = SUCCESS;
+	QSPI_InitTypeDef Init;
 
-	qspi_WriteEnable();
+  /*  System level initialization **********************************************
+  - QUADSPI Initialization:
+  - ClockPrescaler = 2, QSPI clock = FAHB / 2+1 = 80MHz / (ClockPrescaler+1) = 26.67MHz
+  - FIFO when 8 more bytes written or read
+  - don't sample the data read from memory half-clock cycle later
+  - flash size = 64Mb = 8MB = 2^(22+1) bytes. 
+  - the read and wirte command should CS# high in 30ns
+  - clock stay low between two command
+  */
+  Init.ClockPrescaler     = 2; /* QSPI clock = 80MHz / (ClockPrescaler+1) = 26.67MHz */
+  Init.FifoThreshold      = 4;
+  Init.SampleShifting     = QSPI_SAMPLE_SHIFTING_HALFCYCLE;
+  Init.FlashSize          = POSITION_VAL(MX25R6435F_FLASH_SIZE) - 1;
+  Init.ChipSelectHighTime = QSPI_CS_HIGH_TIME_1_CYCLE;
+  Init.ClockMode          = QSPI_CLOCK_MODE_0;
+	if (qspi_Init(&Init) != SUCCESS)
+  {
+		terminal("\n%sqspi_Init", _Error);
+    return ERROR;
+  }
+  
+	/*  QSPI memory reset   ******************************************************/
+	if(qspi_ResetMemory() != SUCCESS){
+		terminal("\n%sqspi_ResetChip", _Error);
+    return ERROR;
+	}
+	
+	/* QSPI quad enable **********************************************************/
+	if(qspi_QuadMode(QSPI_QUAD_ENABLE) != SUCCESS){
+		terminal("\n%sqspi_QuadMode", _Error);
+    return ERROR;
+	}
+	/* High performance mode enable **********************************************/
+	if (qspi_HighPerfMode(QSPI_HIGH_PERF_ENABLE) != SUCCESS)
+  {
+		terminal("\n%sqspi_HighPerfMode", _Error);
+    return ERROR;
+  }
+	
+	/* Re-configure the clock for the high performance mode */
+  Init.ClockPrescaler = 1; /* QSPI clock = 80MHz / (ClockPrescaler+1) = 40MHz */
 
-	qspi_Configuration();
+  if (qspi_Init(&Init) != SUCCESS)
+  {
+		terminal("\n%sqspi_Init -> Prescaler = 1", _Error);
+    return ERROR;
+  }
+	
+	terminal("\nQSPI OK!");
+  return SUCCESS;
 }
 
 /**
@@ -72,23 +120,41 @@ void  qspi_config (void)
   * @param cmd : structure that contains the command configuration information
   * @note   This function is used only in Indirect Read or Write Modes
   */
-void  qspi_Command(QSPI_CommandTypeDef *cmd)
+static uint8_t  qspi_Command(QSPI_CommandTypeDef *cmd)
 {
+	ErrorStatus status;
+	
   /* Wait till BUSY flag reset */
-  while(QUADSPI->SR & QUADSPI_SR_BUSY) { }
+	status = qspi_WaitFlagStateUntilTimeout(QUADSPI->SR, QUADSPI_SR_BUSY, RESET, QSPI_TIMEOUT);
+	
+	if(status == SUCCESS){
+		/* Call the configuration function */
+		QSPI_Config(cmd, QSPI_FUNCTIONAL_MODE_INDIRECT_WRITE);
+		
+		/* make a small delay */
+		for (uint8_t i  = 0; i < 100; i++) {
+			__NOP();
+		}
+		
+		if (cmd->DataMode == QSPI_DATA_NONE)
+		{
+			/* When there is no data phase, the transfer start as soon as the configuration is done
+			so wait until TC flag is set to go back in idle state */
+			status = qspi_WaitFlagStateUntilTimeout(QUADSPI->SR, QUADSPI_SR_TCF, SET, QSPI_TIMEOUT);
+			
+			/* Clears QSPI_FLAG_TC's flag status. */
+			QUADSPI->FCR |= QUADSPI_FCR_CTCF;
+		}
+	}
+	else
+	{
+		#if(qspi_debug == 1)
+		terminal("\n%sqspi_Command - > Busy", _Error);
+		#endif
+	}
   
-  /* Call the configuration function */
-  QSPI_Config(cmd, QSPI_FUNCTIONAL_MODE_INDIRECT_WRITE);
-
-  if (cmd->DataMode == QSPI_DATA_NONE)
-  {
-    /* When there is no data phase, the transfer start as soon as the configuration is done
-    so wait until TC flag is set to go back in idle state */
-    while((QUADSPI->SR & QUADSPI_SR_TCF) == RESET) { }
-    
-    /* Clears QSPI_FLAG_TC's flag status. */
-    QUADSPI->FCR |= QUADSPI_FCR_CTCF;
-  }
+	/* Return function status */
+	return status;
 }
 
 /**
@@ -99,46 +165,71 @@ void  qspi_Command(QSPI_CommandTypeDef *cmd)
   * @note   This function is used only in Indirect Write Mode
   * @retval HAL status
   */
-void  qspi_Transmit (uint8_t *pData)
+static uint8_t  qspi_Transmit (uint8_t *pData)
 {
+	uint8_t status = SUCCESS;
   __IO uint32_t *data_reg = &QUADSPI->DR;
-  __IO uint32_t              TxXferSize;       /* QSPI Tx Transfer size              */
-  __IO uint32_t              TxXferCount;      /* QSPI Tx Transfer Counter           */
-  uint8_t                    *pTxBuffPtr;      /* Pointer to QSPI Tx transfer Buffer */
+	
+  __IO uint32_t   TxSize;       /* QSPI Tx Transfer size              */
+  __IO uint32_t   TxCount;      /* QSPI Tx Transfer Counter           */
+  uint8_t         *TxBufferPtr; /* Pointer to QSPI Tx transfer Buffer */
 
   if(pData != NULL )
   {
-    
 
     /* Configure counters and size of the handle */
-    TxXferCount = READ_REG(QUADSPI->DLR) + 1U;
-    TxXferSize = READ_REG(QUADSPI->DLR) + 1U;
-    pTxBuffPtr = pData;
+    TxCount = READ_REG(QUADSPI->DLR) + 1U;
+    TxSize = READ_REG(QUADSPI->DLR) + 1U;
+    TxBufferPtr = pData;
 
     /* Configure QSPI: CCR register with functional as indirect write */
     MODIFY_REG(QUADSPI->CCR, QUADSPI_CCR_FMODE, QSPI_FUNCTIONAL_MODE_INDIRECT_WRITE);
 
-    while(TxXferCount > 0U)
+    while(TxCount > 0U)
     {
       /* Wait until FT flag is set to send data */
-      while((QUADSPI->SR & QUADSPI_SR_FTF) == RESET);
+			status = qspi_WaitFlagStateUntilTimeout(QUADSPI->SR, QUADSPI_SR_FTF, SET, QSPI_TIMEOUT);
+			
+			if(status != SUCCESS){
+				terminal("\n%sqspi_Transmit: QUADSPI_SR_FTF", _Error);
+				break;
+			}
 
-      *((__IO uint8_t *)data_reg) = *pTxBuffPtr;
-      pTxBuffPtr++;
-      TxXferCount--;
+      *((__IO uint8_t *)data_reg) = *TxBufferPtr;
+      TxBufferPtr++;
+      TxCount--;
     }
     
-    /* Wait until TC flag is set to go back in idle state */
-    while((QUADSPI->SR & QUADSPI_SR_TCF) == RESET);
-    
-    /* Clear Transfer Complete bit */
-    QUADSPI->FCR |= QUADSPI_FCR_CTCF;
-
-  #if  (defined(STM32L471xx) || defined(STM32L475xx) || defined(STM32L476xx) || defined(STM32L485xx) || defined(STM32L486xx))
-    /* Clear Busy bit */
-    qspi_Abort();
-  #endif
-    }
+		if(status == SUCCESS)
+		{
+			/* make a small delay */
+			for (uint8_t i  = 0; i < 100; i++) {
+				__NOP();
+			}
+			
+			/* Wait until TC flag is set to go back in idle state */
+			status = qspi_WaitFlagStateUntilTimeout(QUADSPI->SR, QUADSPI_SR_TCF, SET, QSPI_TIMEOUT);
+			
+			if(status == SUCCESS){
+				/* Clear Transfer Complete bit */
+				QUADSPI->FCR |= QUADSPI_FCR_CTCF;
+				
+				 #if  (defined(STM32L471xx) || defined(STM32L475xx) || defined(STM32L476xx) || defined(STM32L485xx) || defined(STM32L486xx))
+				/* Clear Busy bit */
+				status = qspi_Abort();
+				if(status != SUCCESS){
+					terminal("\n%sqspi_Transmit -> qspi_Abort", _Error);
+				}
+				
+				#endif
+			}
+			else{
+				terminal("\n%sqspi_Transmit -> QUADSPI_SR_TCF", _Error);
+			}
+		}
+	}
+		
+	return status;
 }
 
 
@@ -150,100 +241,133 @@ void  qspi_Transmit (uint8_t *pData)
   * @note   This function is used only in Indirect Read Mode
   * @retval HAL status
   */
-void  qspi_Receive (uint8_t *pData)
+static uint8_t  qspi_Receive (uint8_t *pData)
 {
+	uint8_t status;
   uint32_t addr_reg = READ_REG(QUADSPI->AR);
   __IO uint32_t *data_reg = &QUADSPI->DR;
-  uint8_t                    *pRxBuffPtr;      /* Pointer to QSPI Rx transfer Buffer */
-  __IO uint32_t              RxXferSize;       /* QSPI Rx Transfer size              */
-  __IO uint32_t              RxXferCount;      /* QSPI Rx Transfer Counter           */
+	
+  uint8_t                   *RxBufferPtr;	/* Pointer to QSPI Rx transfer Buffer */
+  __IO uint32_t             RxSize;       /* QSPI Rx Transfer size              */
+  __IO uint32_t             RxCount;  	  /* QSPI Rx Transfer Counter           */
 
   if(pData != NULL )
   {
-    /* Configure counters and size of the handle */
-    RxXferCount = READ_REG(QUADSPI->DLR) + 1U;
-    RxXferSize = READ_REG(QUADSPI->DLR) + 1U;
-    pRxBuffPtr = pData;
+    /* Configure counters and size of QSPI Recieve */
+    RxCount = READ_REG(QUADSPI->DLR) + 1U;
+    RxSize = READ_REG(QUADSPI->DLR) + 1U;
+    RxBufferPtr = pData;
 
     /* Configure QSPI: CCR register with functional as indirect read */
     MODIFY_REG(QUADSPI->CCR, QUADSPI_CCR_FMODE, QSPI_FUNCTIONAL_MODE_INDIRECT_READ);
 
     /* Start the transfer by re-writing the address in AR register */
     WRITE_REG(QUADSPI->AR, addr_reg);
-
-    while(RxXferCount > 0U)
+		
+		/* make a small delay */
+		for (uint8_t i  = 0; i < 100; i++) {
+			__NOP();
+		}
+		
+    while(RxCount > 0U)
     {
       /* Wait until FT or TC flag is set to read received data */
-      while((QUADSPI->SR & (QUADSPI_SR_TCF|QUADSPI_SR_FTF)) == RESET);
+			status = qspi_WaitFlagStateUntilTimeout(QUADSPI->SR, (QUADSPI_SR_TCF|QUADSPI_SR_FTF), SET, QSPI_TIMEOUT);
+
+			if(status != SUCCESS){
+				terminal("\n%sqspi_Receive -> FT or TC flag", _Error);
+				return ERROR;
+			}
 
       
 
-      *pRxBuffPtr = *((__IO uint8_t *)data_reg);
-      pRxBuffPtr++;
-      RxXferCount--;
+      *RxBufferPtr = *((__IO uint8_t *)data_reg);
+      RxBufferPtr++;
+      RxCount--;
     }
 
 
     /* Wait until TC flag is set to go back in idle state */
-    while((QUADSPI->SR & QUADSPI_SR_TCF) == RESET);
+		status = qspi_WaitFlagStateUntilTimeout(QUADSPI->SR, QUADSPI_SR_TCF, SET, QSPI_TIMEOUT);
+		if(status != SUCCESS){
+			terminal("\n%sqspi_Receive -> QUADSPI_SR_TCF", _Error);
+		}
+			
     /* Clear Transfer Complete bit */
     QUADSPI->FCR |= QUADSPI_FCR_CTCF;
     
     #if  (defined(STM32L471xx) || defined(STM32L475xx) || defined(STM32L476xx) || defined(STM32L485xx) || defined(STM32L486xx))
       /* Workaround - Extra data written in the FIFO at the end of a read transfer */
-      qspi_Abort();
+      status = qspi_Abort();
+			if(status != SUCCESS){
+				terminal("\n%sqspi_Receive -> qspi_Abort", _Error);
+			}
     #endif
   }
+	return status;
 }
 
 
-void  qspi_EraseSector(uint32_t EraseStartAddress, uint32_t EraseEndAddress)
+uint8_t  qspi_EraseSector(uint32_t EraseStartAddress, uint32_t EraseEndAddress)
 {
 
-  QSPI_CommandTypeDef sCommand;
+  QSPI_CommandTypeDef qspiCmd;
 
 	EraseStartAddress = EraseStartAddress - EraseStartAddress % MEMORY_SECTOR_SIZE;
 
 	/* Erasing Sequence -------------------------------------------------- */
-	sCommand.InstructionMode = QSPI_INSTRUCTION_1_LINE;
-	sCommand.AddressSize = QSPI_ADDRESS_24_BITS;
-	sCommand.AlternateByteMode = QSPI_ALTERNATE_BYTES_NONE;
-	sCommand.DdrMode = QSPI_DDR_MODE_DISABLE;
-	sCommand.DdrHoldHalfCycle = QSPI_DDR_HHC_ANALOG_DELAY;
-	sCommand.SIOOMode = QSPI_SIOO_INST_EVERY_CMD;
-	sCommand.Instruction = SECTOR_ERASE_CMD;
-	sCommand.AddressMode = QSPI_ADDRESS_1_LINE;
+	qspiCmd.InstructionMode = QSPI_INSTRUCTION_1_LINE;
+	qspiCmd.AddressSize = QSPI_ADDRESS_24_BITS;
+	qspiCmd.AlternateByteMode = QSPI_ALTERNATE_BYTES_NONE;
+	qspiCmd.DdrMode = QSPI_DDR_MODE_DISABLE;
+	qspiCmd.DdrHoldHalfCycle = QSPI_DDR_HHC_ANALOG_DELAY;
+	qspiCmd.SIOOMode = QSPI_SIOO_INST_EVERY_CMD;
+	qspiCmd.Instruction = SECTOR_ERASE_CMD;
+	qspiCmd.AddressMode = QSPI_ADDRESS_1_LINE;
 
-	sCommand.DataMode = QSPI_DATA_NONE;
-	sCommand.DummyCycles = 0;
+	qspiCmd.DataMode = QSPI_DATA_NONE;
+	qspiCmd.DummyCycles = 0;
 
 	while (EraseEndAddress >= EraseStartAddress) {
-		sCommand.Address = (EraseStartAddress & 0x0FFFFFFF);
+		qspiCmd.Address = (EraseStartAddress & 0x0FFFFFFF);
 
-		qspi_WriteEnable();
+		if(qspi_WriteEnable() != SUCCESS){
+			terminal("\nqspi_EraseSector");
+			return ERROR;
+		}
 
-		qspi_Command(&sCommand);
+		if(qspi_Command(&qspiCmd) != SUCCESS){
+			terminal("\nqspi_EraseSector");
+			return ERROR;
+		}
 		EraseStartAddress += MEMORY_SECTOR_SIZE;
 
-		qspi_AutoPollingMemReady();
+		if(qspi_AutoPollingMemReady() != SUCCESS){
+			terminal("\nqspi_EraseSector");
+			return ERROR;
+		}
 	}
+	terminal("\nSectors %X to %X Erased!", EraseStartAddress, EraseEndAddress);
+	return SUCCESS;
 }
 
 void  qspi_WriteMemory(uint8_t* buffer, uint32_t address, uint32_t buffer_size)
 {
 
-	QSPI_CommandTypeDef sCommand;
+	QSPI_CommandTypeDef qspiCmd;
 	uint32_t end_addr, current_size, current_addr;
 
 	/* Calculation of the size between the write address and the end of the page */
-	current_addr = 0;
+	current_size = MX25R6435F_PAGE_SIZE - (address % MX25R6435F_PAGE_SIZE);
 
 
-	//
+	// finding the related page's address
 	while (current_addr <= address) {
 		current_addr += MEMORY_PAGE_SIZE;
 	}
 	current_size = current_addr - address;
+	terminal("\ncurrent_size %d\ncurrent_addr %dd\naddress %d", current_size, current_addr, address);
+	while(1);
 
 	/* Check if the size of the data is less than the remaining place in the page */
 	if (current_size > buffer_size) {
@@ -254,31 +378,31 @@ void  qspi_WriteMemory(uint8_t* buffer, uint32_t address, uint32_t buffer_size)
 	current_addr = address;
 	end_addr = address + buffer_size;
 
-	sCommand.InstructionMode = QSPI_INSTRUCTION_1_LINE;
-	sCommand.AddressSize = QSPI_ADDRESS_24_BITS;
-	sCommand.AlternateByteMode = QSPI_ALTERNATE_BYTES_NONE;
-	sCommand.DdrMode = QSPI_DDR_MODE_DISABLE;
-	sCommand.DdrHoldHalfCycle = QSPI_DDR_HHC_ANALOG_DELAY;
-	sCommand.SIOOMode = QSPI_SIOO_INST_EVERY_CMD;
+	qspiCmd.InstructionMode = QSPI_INSTRUCTION_1_LINE;
+	qspiCmd.AddressSize = QSPI_ADDRESS_24_BITS;
+	qspiCmd.AlternateByteMode = QSPI_ALTERNATE_BYTES_NONE;
+	qspiCmd.DdrMode = QSPI_DDR_MODE_DISABLE;
+	qspiCmd.DdrHoldHalfCycle = QSPI_DDR_HHC_ANALOG_DELAY;
+	qspiCmd.SIOOMode = QSPI_SIOO_INST_EVERY_CMD;
 #ifdef ONE_LINE_WRITE
 	// one line
-	sCommand.Instruction = PAGE_PROG_CMD;
-	sCommand.AddressMode = QSPI_ADDRESS_1_LINE;
-	sCommand.DataMode = QSPI_DATA_1_LINE;
+	qspiCmd.Instruction = PAGE_PROG_CMD;
+	qspiCmd.AddressMode = QSPI_ADDRESS_1_LINE;
+	qspiCmd.DataMode = QSPI_DATA_1_LINE;
 #else
 	// four lines
-	sCommand.Instruction = QUAD_PAGE_PROG_CMD;
-	sCommand.AddressMode = QSPI_ADDRESS_4_LINES;
-	sCommand.DataMode = QSPI_DATA_4_LINES;
+	qspiCmd.Instruction = QUAD_PAGE_PROG_CMD;
+	qspiCmd.AddressMode = QSPI_ADDRESS_4_LINES;
+	qspiCmd.DataMode = QSPI_DATA_4_LINES;
 #endif
-	sCommand.NbData = buffer_size;
-	sCommand.Address = address;
-	sCommand.DummyCycles = 0;
+	qspiCmd.NbData = buffer_size;
+	qspiCmd.Address = address;
+	qspiCmd.DummyCycles = 0;
 
 	/* Perform the write page by page */
 	do {
-		sCommand.Address = current_addr;
-		sCommand.NbData = current_size;
+		qspiCmd.Address = current_addr;
+		qspiCmd.NbData = current_size;
 
 		if (current_size == 0) {
 			break;
@@ -288,7 +412,7 @@ void  qspi_WriteMemory(uint8_t* buffer, uint32_t address, uint32_t buffer_size)
 		qspi_WriteEnable();
 
 		/* Configure the command */
-		qspi_Command(&sCommand);
+		qspi_Command(&qspiCmd);
 
 		/* Transmission of the data */
 		qspi_Transmit(buffer);
@@ -343,7 +467,10 @@ void  qspi_ReadMemory(uint8_t* buffer, uint32_t address,uint32_t buffer_size)
 void  qspi_Erase_Chip(void)
 {
 	QSPI_CommandTypeDef sCommand;
-
+	
+	terminal("\nchip erase started");
+	time_show();
+	
 	qspi_WriteEnable();
 
 	/* Erasing Sequence --------------------------------- */
@@ -363,120 +490,301 @@ void  qspi_Erase_Chip(void)
 	qspi_Command(&sCommand);
 
 	qspi_AutoPollingMemReady();
+	time_show();
   terminal("\nChip Erase: OK!");
 }
 
+
+void	qspi_Byte_write_init (uint32_t address)
+{
+	terminal("\nHalt");
+	while(1);
+}
 /*******************************************************************************
  * QUADSPI static Functions
  *******************************************************************************/
-static void qspi_ResetChip (void)
+/**
+  * @brief Initialize the QSPI mode according to the specified parameters
+  *        in the QSPI_InitTypeDef and initialize the associated handle.
+  * @param hqspi : QSPI handle
+  * @retval HAL status
+  */
+static uint8_t qspi_Init(QSPI_InitTypeDef *Init)
 {
-  
-	QSPI_CommandTypeDef qspiCmd;
-	uint32_t temp = 0;
-	/* Erasing Sequence -------------------------------------------------- */
-	qspiCmd.InstructionMode   = QSPI_INSTRUCTION_1_LINE;
-	qspiCmd.AddressSize       = QSPI_ADDRESS_24_BITS;
-	qspiCmd.AlternateByteMode = QSPI_ALTERNATE_BYTES_NONE;
-	qspiCmd.DdrMode           = QSPI_DDR_MODE_DISABLE;
-	qspiCmd.DdrHoldHalfCycle  = QSPI_DDR_HHC_ANALOG_DELAY;
-	qspiCmd.SIOOMode          = QSPI_SIOO_INST_EVERY_CMD;
-	qspiCmd.Instruction       = RESET_ENABLE_CMD;
-	qspiCmd.AddressMode       = QSPI_ADDRESS_NONE;
-	qspiCmd.Address           = 0;
-	qspiCmd.DataMode          = QSPI_DATA_NONE;
-	qspiCmd.DummyCycles       = 0;
+  uint8_t status;
 
-	qspi_Command(&qspiCmd);
-  
-	for (temp = 0; temp < 0x2f; temp++) {
-		__NOP();
-	}
+  /* Check the QSPI_CommandTypeDef allocation */
+  if(Init == NULL)
+  {
+    return ERROR;
+  }
+	
+	/* Init the low level hardware : GPIO, CLOCK */
+	qspi_gpio_Init();
 
-	qspiCmd.InstructionMode = QSPI_INSTRUCTION_1_LINE;
-	qspiCmd.AddressSize = QSPI_ADDRESS_24_BITS;
-	qspiCmd.AlternateByteMode = QSPI_ALTERNATE_BYTES_NONE;
-	qspiCmd.DdrMode = QSPI_DDR_MODE_DISABLE;
-	qspiCmd.DdrHoldHalfCycle = QSPI_DDR_HHC_ANALOG_DELAY;
-	qspiCmd.SIOOMode = QSPI_SIOO_INST_EVERY_CMD;
-	qspiCmd.Instruction = RESET_MEMORY_CMD;
-	qspiCmd.AddressMode = QSPI_ADDRESS_NONE;
-	qspiCmd.Address = 0;
-	qspiCmd.DataMode = QSPI_DATA_NONE;
-	qspiCmd.DummyCycles = 0;
+  /* Configure QSPI FIFO Threshold */
+  MODIFY_REG(QUADSPI->CR, QUADSPI_CR_FTHRES,
+             ((Init->FifoThreshold - 1U) << QUADSPI_CR_FTHRES_Pos));
 
-	qspi_Command(&qspiCmd);
+  /* Wait till BUSY flag reset */
+  status = qspi_WaitFlagStateUntilTimeout(QUADSPI->SR, QUADSPI_SR_BUSY, RESET, QSPI_TIMEOUT);
+
+  if(status == SUCCESS)
+  {
+    /* Configure QSPI Clock Prescaler and Sample Shift */
+    MODIFY_REG(QUADSPI->CR, (QUADSPI_CR_PRESCALER | QUADSPI_CR_SSHIFT),
+               ((Init->ClockPrescaler << QUADSPI_CR_PRESCALER_Pos) |
+                 Init->SampleShifting));
+
+
+    /* Configure QSPI Flash Size, CS High Time and Clock Mode */
+    MODIFY_REG(QUADSPI->DCR, (QUADSPI_DCR_FSIZE | QUADSPI_DCR_CSHT | QUADSPI_DCR_CKMODE),
+               ((Init->FlashSize << QUADSPI_DCR_FSIZE_Pos) |
+                 Init->ChipSelectHighTime | Init->ClockMode));
+
+    /* Enable the QSPI peripheral */
+    QUADSPI->CR |= QUADSPI_CR_EN;
+  }
+
+  /* Return function status */
+  return status;
 }
 
 
 /**
-  * @brief QUADSPI Initialization Function
-  * @param None
+  * @brief  This function reset the QSPI memory.
+  * @param  hqspi : QSPI handle
   * @retval None
   */
-static void mx_qspi_Init (void)
-{
-  uint32_t temp;
-  volatile int i = 0;
-  
-  /* Enable the Quad-SPI interface clock */
-  RCC->AHB3ENR |= RCC_AHB3ENR_QSPIEN;
-  /* Reset QSPI peripheral */
-  RCC->AHB3RSTR |= RCC_AHB3RSTR_QSPIRST;  // Reset
-  RCC->AHB3RSTR &= ~RCC_AHB3RSTR_QSPIRST; // Release reset
 
-  /*
-    QUADSPI Initialization:
-  - ClockPrescaler = 0, QSPI clock = FAHB / 1 = 80MHz / 1 = 80MHz
-  - FIFO when 8 more bytes written or read
-  - don't sample the data read from memory half-clock cycle later
-  - flash size = 64Mb = 8MB = 2^(22+1) bytes. 
-  - the read and wirte command should CS# high in 30ns
-  - clock stay low bwteen two command
-  */
-  
-  /* configure the clock prescaller,
-                   fifo threshold, 
-                   the clock mode, 
-                   sample shifting.
-  */
-  QUADSPI->CR |= (((4 - 1U) << QUADSPI_CR_FTHRES_Pos)|
-                  (0 << QUADSPI_CR_PRESCALER_Pos)|
-                  (0 << QUADSPI_CR_SSHIFT));
-  
-  /* Wait till BUSY flag reset */
-  while(QUADSPI->SR & QUADSPI_SR_BUSY){ }
-  
-  /* Configure QSPI Flash Size, CS High Time and Clock Mode */
-  i = 0;
-  temp = MX25R6435F_FLASH_SIZE;
-  do{             // finding the flash size 2 ^ (x+1) = size
-    temp /= 2;
-    i++;
-  }while(temp > 2);
-  QUADSPI->DCR |= ((i << QUADSPI_DCR_FSIZE_Pos)|
-                   (0 << QUADSPI_DCR_CSHT_Pos));
-  
-  /* Enable the peripheral. */
-  QUADSPI->CR |= QUADSPI_CR_EN;
-  
-  #if (qspi_debug == 1)
-    terminal("\nCR : %X", QUADSPI->CR);
-    terminal("\nDCR: %X", QUADSPI->DCR);
-    terminal("\nSR : %X", QUADSPI->SR);
-    terminal("\nFCR: %X", QUADSPI->FCR);
-    terminal("\nDLR: %X", QUADSPI->DLR);
-    terminal("\nCCR: %X", QUADSPI->CCR);
-    terminal("\nAR : %X", QUADSPI->AR);
-    terminal("\nABR: %X", QUADSPI->ABR);
-    terminal("\nDR : %X", QUADSPI->DR);
-    terminal("\nPSMKR: %X", QUADSPI->PSMKR);
-    terminal("\nPSMAR: %X", QUADSPI->PSMAR);
-    terminal("\nPIR: %X", QUADSPI->PIR);
-    terminal("\nLPTR: %X", QUADSPI->LPTR);
-    terminal("\n______________");
-  #endif
+static uint8_t qspi_ResetMemory (void)
+{
+	QSPI_CommandTypeDef qspiCmd;
+	
+	/* Initialize the reset enable command */
+	qspiCmd.InstructionMode   = QSPI_INSTRUCTION_1_LINE;
+  qspiCmd.Instruction       = RESET_ENABLE_CMD;
+  qspiCmd.AddressMode       = QSPI_ADDRESS_NONE;
+	qspiCmd.Address						= 0;
+  qspiCmd.AlternateByteMode = QSPI_ALTERNATE_BYTES_NONE;
+  qspiCmd.DataMode          = QSPI_DATA_NONE;
+  qspiCmd.DummyCycles       = 0;
+  qspiCmd.DdrMode           = QSPI_DDR_MODE_DISABLE;
+  qspiCmd.DdrHoldHalfCycle  = QSPI_DDR_HHC_ANALOG_DELAY;
+  qspiCmd.SIOOMode          = QSPI_SIOO_INST_EVERY_CMD;
+
+
+	/* Send the command */
+	if (qspi_Command(&qspiCmd) != SUCCESS){
+		terminal("\n%sqspi_Resetchip -> RESET_ENABLE_CMD", _Error);
+    return ERROR;
+  }
+
+	/* Send the reset memory command */
+	qspiCmd.Instruction				= RESET_MEMORY_CMD;
+
+	/* Send the command */
+	if (qspi_Command(&qspiCmd) != SUCCESS){
+		terminal("\n%sqspi_Resetchip -> RESET_MEMORY_CMD", _Error);
+    return ERROR;
+  }
+	return SUCCESS;
 }
+/**
+  * @brief  This function enables/disables the Quad mode of the memory.
+  * @param  hqspi     : QSPI handle
+  * @param  Operation : QSPI_QUAD_ENABLE or QSPI_QUAD_DISABLE mode  
+  * @retval None
+  */
+static uint8_t qspi_QuadMode(uint8_t Operation)
+{
+  QSPI_CommandTypeDef qspiCmd;
+  uint8_t reg;
+
+  /* Read status register */
+  qspiCmd.InstructionMode   = QSPI_INSTRUCTION_1_LINE;
+  qspiCmd.Instruction       = READ_STATUS_REG_CMD;
+  qspiCmd.AddressMode       = QSPI_ADDRESS_NONE;
+  qspiCmd.AlternateByteMode = QSPI_ALTERNATE_BYTES_NONE;
+  qspiCmd.DataMode          = QSPI_DATA_1_LINE;
+  qspiCmd.DummyCycles       = 0;
+  qspiCmd.NbData            = 1;
+  qspiCmd.DdrMode           = QSPI_DDR_MODE_DISABLE;
+  qspiCmd.DdrHoldHalfCycle  = QSPI_DDR_HHC_ANALOG_DELAY;
+  qspiCmd.SIOOMode          = QSPI_SIOO_INST_EVERY_CMD;
+
+  if (qspi_Command(&qspiCmd) != SUCCESS)
+  {
+    return ERROR;
+  }
+
+  if (qspi_Receive(&reg) != SUCCESS)
+  {
+    return ERROR;
+  }
+	
+  /* Enable write operations */
+  if (qspi_WriteEnable() != SUCCESS)
+  {
+    return ERROR;
+  }
+	
+  /* Activate/deactivate the Quad mode */
+  if (Operation == QSPI_QUAD_ENABLE)
+  {
+    SET_BIT(reg, MX25R6435F_SR_QE);
+  }
+  else
+  {
+    CLEAR_BIT(reg, MX25R6435F_SR_QE);
+  }
+
+  qspiCmd.Instruction = WRITE_STATUS_CFG_REG_CMD;
+
+  if (qspi_Command(&qspiCmd) != SUCCESS)
+  {
+    return ERROR;
+  }
+  if (qspi_Transmit(&reg) != SUCCESS)
+  {
+    return ERROR;
+  }
+
+  /* Wait that memory is ready */  
+  if (qspi_AutoPollingMemReady() != SUCCESS)
+  {
+    return ERROR;
+  }
+  
+  /* Check the configuration has been correctly done */
+  qspiCmd.Instruction = READ_STATUS_REG_CMD;
+
+  if (qspi_Command(&qspiCmd) != SUCCESS)
+  {
+    return ERROR;
+  }
+
+  if (qspi_Receive(&reg) != SUCCESS)
+  {
+    return ERROR;
+  }
+  
+  if ((((reg & MX25R6435F_SR_QE) == 0) && (Operation == QSPI_QUAD_ENABLE)) ||
+      (((reg & MX25R6435F_SR_QE) != 0) && (Operation == QSPI_QUAD_DISABLE)))
+  {
+    return ERROR;
+  }
+
+  return SUCCESS;
+}
+/**
+  * @brief  This function enables/disables the high performance mode of the memory.
+  * @param  hqspi     : QSPI handle
+  * @param  Operation : QSPI_HIGH_PERF_ENABLE or QSPI_HIGH_PERF_DISABLE high performance mode    
+  * @retval None
+  */
+static uint8_t qspi_HighPerfMode(uint8_t Operation)
+{
+  QSPI_CommandTypeDef qspiCmd;
+  uint8_t reg[3];
+
+  /* Read status register */
+  qspiCmd.InstructionMode   = QSPI_INSTRUCTION_1_LINE;
+  qspiCmd.Instruction       = READ_STATUS_REG_CMD;
+  qspiCmd.AddressMode       = QSPI_ADDRESS_NONE;
+  qspiCmd.AlternateByteMode = QSPI_ALTERNATE_BYTES_NONE;
+  qspiCmd.DataMode          = QSPI_DATA_1_LINE;
+  qspiCmd.DummyCycles       = 0;
+  qspiCmd.NbData            = 1;
+  qspiCmd.DdrMode           = QSPI_DDR_MODE_DISABLE;
+  qspiCmd.DdrHoldHalfCycle  = QSPI_DDR_HHC_ANALOG_DELAY;
+  qspiCmd.SIOOMode          = QSPI_SIOO_INST_EVERY_CMD;
+
+  if (qspi_Command(&qspiCmd) != SUCCESS)
+  {
+    return ERROR;
+  }
+
+  if (qspi_Receive(&reg[0]) != SUCCESS)
+  {
+    return ERROR;
+  }
+
+  /* Read configuration registers */
+  qspiCmd.Instruction = READ_CFG_REG_CMD;
+  qspiCmd.NbData      = 2;
+
+  if (qspi_Command(&qspiCmd) != SUCCESS)
+  {
+    return ERROR;
+  }
+
+  if (qspi_Receive(&reg[1]) != SUCCESS)
+  {
+    return ERROR;
+  }
+
+  /* Enable write operations */
+  if (qspi_WriteEnable() != SUCCESS)
+  {
+    return ERROR;
+  }
+  
+  /* Activate/deactivate the Quad mode */
+  if (Operation == QSPI_HIGH_PERF_ENABLE)
+  {
+    SET_BIT(reg[2], MX25R6435F_CR2_LH_SWITCH);
+  }
+  else
+  {
+    CLEAR_BIT(reg[2], MX25R6435F_CR2_LH_SWITCH);
+  }
+
+  qspiCmd.Instruction = WRITE_STATUS_CFG_REG_CMD;
+  qspiCmd.NbData      = 3;
+
+  if (qspi_Command(&qspiCmd) != SUCCESS)
+  {
+    return ERROR;
+  }
+
+  if (qspi_Transmit(&reg[0]) != SUCCESS)
+  {
+    return ERROR;
+  }
+
+  /* Wait that memory is ready */  
+  if (qspi_AutoPollingMemReady() != SUCCESS)
+  {
+    return ERROR;
+  }
+  
+  /* Check the configuration has been correctly done */
+  qspiCmd.Instruction = READ_CFG_REG_CMD;
+  qspiCmd.NbData      = 2;
+
+  if (qspi_Command(&qspiCmd) != SUCCESS)
+  {
+    return ERROR;
+  }
+
+  if (qspi_Receive(&reg[0]) != SUCCESS)
+  {
+    return ERROR;
+  }
+  
+  if ((((reg[1] & MX25R6435F_CR2_LH_SWITCH) == 0) && (Operation == QSPI_HIGH_PERF_ENABLE)) ||
+      (((reg[1] & MX25R6435F_CR2_LH_SWITCH) != 0) && (Operation == QSPI_HIGH_PERF_DISABLE)))
+  {
+    return ERROR;
+  }
+
+  return SUCCESS;
+}
+
+/*******************************************************************************
+ * 
+ *******************************************************************************/
 static void qspi_gpio_Init (void)
 {
   LL_GPIO_InitTypeDef GPIO_InitDef;
@@ -506,94 +814,122 @@ static void qspi_gpio_Init (void)
   GPIO_InitDef.Pull = LL_GPIO_PULL_NO;
   GPIO_InitDef.Alternate = LL_GPIO_AF_10;
   LL_GPIO_Init(GPIOE, &GPIO_InitDef);
+	
+	/* Enable the Quad-SPI interface clock */
+  RCC->AHB3ENR |= RCC_AHB3ENR_QSPIEN;
+  /* Reset QSPI peripheral */
+  RCC->AHB3RSTR |= RCC_AHB3RSTR_QSPIRST;  // Reset
+  RCC->AHB3RSTR &= ~RCC_AHB3RSTR_QSPIRST; // Release reset
 }
 
-
-static void qspi_AutoPolling (QSPI_CommandTypeDef *cmd, QSPI_AutoPollingTypeDef *cfg)
+static uint8_t qspi_AutoPolling (QSPI_CommandTypeDef *cmd, QSPI_AutoPollingTypeDef *cfg)
 {
+	uint8_t status = SUCCESS;
   /* Wait till BUSY flag reset */
-  while(QUADSPI->SR & QUADSPI_SR_BUSY) { }
+	status = qspi_WaitFlagStateUntilTimeout(QUADSPI->SR, QUADSPI_SR_BUSY, RESET, QSPI_TIMEOUT);
+	
+	if(status == SUCCESS){
+		/* Configure QSPI: PSMAR register with the status match value */
+		WRITE_REG(QUADSPI->PSMAR, cfg->Match);
 
-  /* Configure QSPI: PSMAR register with the status match value */
-  WRITE_REG(QUADSPI->PSMAR, cfg->Match);
+		/* Configure QSPI: PSMKR register with the status mask value */
+		WRITE_REG(QUADSPI->PSMKR, cfg->Mask);
 
-  /* Configure QSPI: PSMKR register with the status mask value */
-  WRITE_REG(QUADSPI->PSMKR, cfg->Mask);
+		/* Configure QSPI: PIR register with the interval value */
+		WRITE_REG(QUADSPI->PIR, cfg->Interval);
 
-  /* Configure QSPI: PIR register with the interval value */
-  WRITE_REG(QUADSPI->PIR, cfg->Interval);
+		/* Configure QSPI: CR register with Match mode and Automatic stop enabled
+		(otherwise there will be an infinite loop in blocking mode) */
+		MODIFY_REG(QUADSPI->CR, (QUADSPI_CR_PMM | QUADSPI_CR_APMS), (cfg->MatchMode | QSPI_AUTOMATIC_STOP_ENABLE));
 
-  /* Configure QSPI: CR register with Match mode and Automatic stop enabled
-  (otherwise there will be an infinite loop in blocking mode) */
-  MODIFY_REG(QUADSPI->CR, (QUADSPI_CR_PMM | QUADSPI_CR_APMS),
-           (cfg->MatchMode | QSPI_AUTOMATIC_STOP_ENABLE));
+		/* Call the configuration function */
+		cmd->NbData = cfg->StatusBytesSize;
+		QSPI_Config(cmd, QSPI_FUNCTIONAL_MODE_AUTO_POLLING);
+		
+		/* make a small delay */
+		for (uint8_t i  = 0; i < 100; i++) {
+			__NOP();
+		}
+		
+		/* Wait until SM flag is set to go back in idle state */
+		status = qspi_WaitFlagStateUntilTimeout(QUADSPI->SR, QUADSPI_SR_SMF, SET, QSPI_TIMEOUT);
+		
+		if(status == SUCCESS){
+			/* Clears QSPI_FLAG_SM's flag status. */
+			QUADSPI->FCR |= QUADSPI_FCR_CSMF;
+		}
+	}
 
-  /* Call the configuration function */
-  cmd->NbData = cfg->StatusBytesSize;
-  QSPI_Config(cmd, QSPI_FUNCTIONAL_MODE_AUTO_POLLING);
-
-  /* Wait until SM flag is set to go back in idle state */
-  while((QUADSPI->SR & QUADSPI_SR_SMF) == RESET) { }
-
-
-  /* Clears QSPI_FLAG_SM's flag status. */
-  QUADSPI->FCR |= QUADSPI_FCR_CSMF;
+  /* Return function status */
+  return status;
 }
-static void qspi_AutoPollingMemReady (void)
+static uint8_t qspi_AutoPollingMemReady (void)
 {
   QSPI_CommandTypeDef qspiCmd;
 	QSPI_AutoPollingTypeDef qspiCfg;
 
 	/* Configure automatic polling mode to wait for memory ready ------ */
-	qspiCmd.InstructionMode = QSPI_INSTRUCTION_1_LINE;
-	qspiCmd.Instruction = READ_STATUS_REG_CMD;
-	qspiCmd.AddressMode = QSPI_ADDRESS_NONE;
-	qspiCmd.AlternateByteMode = QSPI_ALTERNATE_BYTES_NONE;
-	qspiCmd.DataMode = QSPI_DATA_1_LINE;
-	qspiCmd.DummyCycles = 0;
-	qspiCmd.DdrMode = QSPI_DDR_MODE_DISABLE;
-	qspiCmd.DdrHoldHalfCycle = QSPI_DDR_HHC_ANALOG_DELAY;
-	qspiCmd.SIOOMode = QSPI_SIOO_INST_EVERY_CMD;
+	qspiCmd.InstructionMode 	= QSPI_INSTRUCTION_1_LINE;
+	qspiCmd.Instruction				= READ_STATUS_REG_CMD;
+	qspiCmd.AddressMode 			= QSPI_ADDRESS_NONE;
+	qspiCmd.AlternateByteMode	= QSPI_ALTERNATE_BYTES_NONE;
+	qspiCmd.DataMode 					= QSPI_DATA_1_LINE;
+	qspiCmd.DummyCycles 			= 0;
+	qspiCmd.DdrMode 					= QSPI_DDR_MODE_DISABLE;
+	qspiCmd.DdrHoldHalfCycle 	= QSPI_DDR_HHC_ANALOG_DELAY;
+	qspiCmd.SIOOMode 					= QSPI_SIOO_INST_EVERY_CMD;
 
-	qspiCfg.Match = 0x40;
-	qspiCfg.Mask = 0xFF;
-	qspiCfg.MatchMode = QSPI_MATCH_MODE_AND;
+	qspiCfg.Match 					= MX25R6435F_SR_QE;
+	qspiCfg.Mask 						= 0xFF;
+	qspiCfg.MatchMode 			= QSPI_MATCH_MODE_AND;
 	qspiCfg.StatusBytesSize = 1;
-	qspiCfg.Interval = 0x10;
-	qspiCfg.AutomaticStop = QSPI_AUTOMATIC_STOP_ENABLE;
+	qspiCfg.Interval 				= 0x10;
+	qspiCfg.AutomaticStop 	= QSPI_AUTOMATIC_STOP_ENABLE;
 
-  qspi_AutoPolling(&qspiCmd , &qspiCfg);
+  if(qspi_AutoPolling(&qspiCmd , &qspiCfg) != SUCCESS){
+		return ERROR;
+	}
+	return SUCCESS;
 }
-static void qspi_WriteEnable (void)
+static ErrorStatus qspi_WriteEnable (void)
 {
 	QSPI_CommandTypeDef qspiCmd;
-	QSPI_AutoPollingTypeDef sConfig;
+	QSPI_AutoPollingTypeDef qspiCfg;
 
 	/* Enable write operations ------------------------------------------ */
-	qspiCmd.InstructionMode = QSPI_INSTRUCTION_1_LINE;
-	qspiCmd.Instruction = WRITE_ENABLE_CMD;
-	qspiCmd.AddressMode = QSPI_ADDRESS_NONE;
-	qspiCmd.AlternateByteMode = QSPI_ALTERNATE_BYTES_NONE;
-	qspiCmd.DataMode = QSPI_DATA_NONE;
-	qspiCmd.DummyCycles = 0;
-	qspiCmd.DdrMode = QSPI_DDR_MODE_DISABLE;
-	qspiCmd.DdrHoldHalfCycle = QSPI_DDR_HHC_ANALOG_DELAY;
-	qspiCmd.SIOOMode = QSPI_SIOO_INST_EVERY_CMD;
-
-  qspi_Command(&qspiCmd);
-
+	qspiCmd.InstructionMode   = QSPI_INSTRUCTION_1_LINE;
+  qspiCmd.Instruction       = WRITE_ENABLE_CMD;
+  qspiCmd.AddressMode       = QSPI_ADDRESS_NONE;
+  qspiCmd.AlternateByteMode = QSPI_ALTERNATE_BYTES_NONE;
+  qspiCmd.DataMode          = QSPI_DATA_NONE;
+  qspiCmd.DummyCycles       = 0;
+  qspiCmd.DdrMode           = QSPI_DDR_MODE_DISABLE;
+  qspiCmd.DdrHoldHalfCycle  = QSPI_DDR_HHC_ANALOG_DELAY;
+  qspiCmd.SIOOMode          = QSPI_SIOO_INST_EVERY_CMD;
+	
+	if (qspi_Command(&qspiCmd) != SUCCESS)
+  {
+		terminal("\n%sqspi_WriteEnable -> WRITE_ENABLE_CMD", _Error);
+    return ERROR;
+  }
+	//LL_mDelay(2000);
+	
 	/* Configure automatic polling mode to wait for write enabling ---- */
-	sConfig.Match = 0x02;
-	sConfig.Mask = 0x02;
-	sConfig.MatchMode = QSPI_MATCH_MODE_AND;
-	sConfig.StatusBytesSize = 1;
-	sConfig.Interval = 0x10;
-	sConfig.AutomaticStop = QSPI_AUTOMATIC_STOP_ENABLE;
+	qspiCfg.Match           = MX25R6435F_SR_WEL;
+  qspiCfg.Mask            = MX25R6435F_SR_WEL;
+  qspiCfg.MatchMode       = QSPI_MATCH_MODE_AND;
+  qspiCfg.StatusBytesSize = 1;
+  qspiCfg.Interval        = 0x10;
+  qspiCfg.AutomaticStop   = QSPI_AUTOMATIC_STOP_ENABLE;
 
-	qspiCmd.Instruction = READ_STATUS_REG_CMD;
-	qspiCmd.DataMode = QSPI_DATA_1_LINE;
+  qspiCmd.Instruction    = READ_STATUS_REG_CMD;
+  qspiCmd.DataMode       = QSPI_DATA_1_LINE;
   
-	qspi_AutoPolling(&qspiCmd, &sConfig);
+	if(qspi_AutoPolling(&qspiCmd , &qspiCfg) != SUCCESS){
+		terminal("\n%sqspi_WriteEnable -> qspi_AutoPolling", _Error);
+		return ERROR;
+	}
+	return SUCCESS;
 }
 /*
  Enable quad mode and set dummy cycles count
@@ -602,6 +938,7 @@ static void qspi_Configuration (void)
 {
 	QSPI_CommandTypeDef qspiCmd;
 	uint8_t test_buffer[4] = { 0 };
+	
 	qspi_Read_All_Reg(test_buffer);
 	/*modify buffer to enable quad mode*/
 	test_buffer[0] |= 0x40;
@@ -667,8 +1004,9 @@ static void qspi_Read_All_Reg (uint8_t* test_buffer)
 * @param  hqspi : QSPI handle
 * @retval HAL status
 */
-static void qspi_Abort (void)
+static uint8_t qspi_Abort (void)
 {
+	uint8_t status;
   if ((QUADSPI->CR & QUADSPI_CR_DMAEN) != 0U)
   {
     /* Disable the DMA transfer by clearing the DMAEN bit in the QSPI CR register */
@@ -679,16 +1017,20 @@ static void qspi_Abort (void)
   SET_BIT(QUADSPI->CR, QUADSPI_CR_ABORT);
 
   /* Wait until TC flag is set to go back in idle state */
-  while((QUADSPI->SR & QUADSPI_SR_TCF) == RESET) { }
-
-  QUADSPI->FCR |= QUADSPI_FCR_CTCF;
-
-
-  /* Wait until BUSY flag is reset */
-  while((QUADSPI->SR & QUADSPI_SR_TCF) == SET) { }
-
-  /* Reset functional mode configuration to indirect write mode by default */
-  CLEAR_BIT(QUADSPI->CCR, QUADSPI_CCR_FMODE);
+	status = qspi_WaitFlagStateUntilTimeout(QUADSPI->SR, QUADSPI_SR_TCF, SET, QSPI_TIMEOUT);
+	if(status == SUCCESS){
+		QUADSPI->FCR |= QUADSPI_FCR_CTCF;
+		
+		/* Wait until BUSY flag is reset */
+		status = qspi_WaitFlagStateUntilTimeout(QUADSPI->SR, QUADSPI_SR_BUSY, RESET, QSPI_TIMEOUT);
+	}
+	
+	if(status == SUCCESS){
+		/* Reset functional mode configuration to indirect write mode by default */
+		CLEAR_BIT(QUADSPI->CCR, QUADSPI_CCR_FMODE);
+	}
+	
+	return status;
 }
 
 /**
@@ -704,7 +1046,7 @@ static void qspi_Abort (void)
   */
 static void QSPI_Config(QSPI_CommandTypeDef *cmd, uint32_t FunctionalMode)
 {
-
+	
   if ((cmd->DataMode != QSPI_DATA_NONE) && (FunctionalMode != QSPI_FUNCTIONAL_MODE_MEMORY_MAPPED))
   {
     /* Configure QSPI: DLR register with the number of data to read or write */
@@ -723,10 +1065,10 @@ static void QSPI_Config(QSPI_CommandTypeDef *cmd, uint32_t FunctionalMode)
         /*---- Command with instruction, address and alternate bytes ----*/
         /* Configure QSPI: CCR register with all communications parameters */
         WRITE_REG(QUADSPI->CCR, (cmd->DdrMode | cmd->DdrHoldHalfCycle | cmd->SIOOMode |
-                                         cmd->DataMode | (cmd->DummyCycles << QUADSPI_CCR_DCYC_Pos) |
-                                         cmd->AlternateBytesSize | cmd->AlternateByteMode |
-                                         cmd->AddressSize | cmd->AddressMode | cmd->InstructionMode |
-                                         cmd->Instruction | FunctionalMode));
+                                 cmd->DataMode | (cmd->DummyCycles << QUADSPI_CCR_DCYC_Pos) |
+                                 cmd->AlternateBytesSize | cmd->AlternateByteMode |
+                                 cmd->AddressSize | cmd->AddressMode | cmd->InstructionMode |
+                                 cmd->Instruction | FunctionalMode));
 
         if (FunctionalMode != QSPI_FUNCTIONAL_MODE_MEMORY_MAPPED)
         {
@@ -785,10 +1127,10 @@ static void QSPI_Config(QSPI_CommandTypeDef *cmd, uint32_t FunctionalMode)
         /*---- Command with address and alternate bytes ----*/
         /* Configure QSPI: CCR register with all communications parameters */
         WRITE_REG(QUADSPI->CCR, (cmd->DdrMode | cmd->DdrHoldHalfCycle | cmd->SIOOMode |
-                                         cmd->DataMode | (cmd->DummyCycles << QUADSPI_CCR_DCYC_Pos) |
-                                         cmd->AlternateBytesSize | cmd->AlternateByteMode |
-                                         cmd->AddressSize | cmd->AddressMode |
-                                         cmd->InstructionMode | FunctionalMode));
+                                 cmd->DataMode | (cmd->DummyCycles << QUADSPI_CCR_DCYC_Pos) |
+                                 cmd->AlternateBytesSize | cmd->AlternateByteMode |
+                                 cmd->AddressSize | cmd->AddressMode |
+                                 cmd->InstructionMode | FunctionalMode));
 
         if (FunctionalMode != QSPI_FUNCTIONAL_MODE_MEMORY_MAPPED)
         {
@@ -801,9 +1143,9 @@ static void QSPI_Config(QSPI_CommandTypeDef *cmd, uint32_t FunctionalMode)
         /*---- Command with only alternate bytes ----*/
         /* Configure QSPI: CCR register with all communications parameters */
         WRITE_REG(QUADSPI->CCR, (cmd->DdrMode | cmd->DdrHoldHalfCycle | cmd->SIOOMode |
-                                         cmd->DataMode | (cmd->DummyCycles << QUADSPI_CCR_DCYC_Pos) |
-                                         cmd->AlternateBytesSize | cmd->AlternateByteMode |
-                                         cmd->AddressMode | cmd->InstructionMode | FunctionalMode));
+                                 cmd->DataMode | (cmd->DummyCycles << QUADSPI_CCR_DCYC_Pos) |
+                                 cmd->AlternateBytesSize | cmd->AlternateByteMode |
+                                 cmd->AddressMode | cmd->InstructionMode | FunctionalMode));
       }
     }
     else
@@ -813,9 +1155,9 @@ static void QSPI_Config(QSPI_CommandTypeDef *cmd, uint32_t FunctionalMode)
         /*---- Command with only address ----*/
         /* Configure QSPI: CCR register with all communications parameters */
         WRITE_REG(QUADSPI->CCR, (cmd->DdrMode | cmd->DdrHoldHalfCycle | cmd->SIOOMode |
-                                         cmd->DataMode | (cmd->DummyCycles << QUADSPI_CCR_DCYC_Pos) |
-                                         cmd->AlternateByteMode | cmd->AddressSize |
-                                         cmd->AddressMode | cmd->InstructionMode | FunctionalMode));
+                                 cmd->DataMode | (cmd->DummyCycles << QUADSPI_CCR_DCYC_Pos) |
+                                 cmd->AlternateByteMode | cmd->AddressSize |
+                                 cmd->AddressMode | cmd->InstructionMode | FunctionalMode));
 
         if (FunctionalMode != QSPI_FUNCTIONAL_MODE_MEMORY_MAPPED)
         {
@@ -837,6 +1179,36 @@ static void QSPI_Config(QSPI_CommandTypeDef *cmd, uint32_t FunctionalMode)
       }
     }
   }
+}
+
+
+
+/**
+  * @brief  Wait for a flag state until timeout.
+  * @param  Register : QSPI Register
+  * @param  Flag : Flag checked
+  * @param  State : Value of the flag expected
+  * @param  Timeout : Duration of the timeout
+  * @retval ErrorStatus
+  */
+static ErrorStatus qspi_WaitFlagStateUntilTimeout(__IO uint32_t Register, uint32_t Flag, FlagStatus State, uint32_t Timeout)
+{
+	uint32_t i = 0;
+  /* Wait until flag is in expected state */
+  while((_QSPI_GET_FLAG(Register, Flag)) != State)
+  {
+		++i;
+    /* Check for the Timeout */
+    if (i >= Timeout)
+    {
+			//terminal("\nqspi_WaitFlagStateUntilTimeout, i:%d, timeout: %d", i, Timeout);
+			return ERROR;
+    }
+  }
+	
+	//terminal("\ni: %d - %d", i, (Register & Flag));
+  
+	return SUCCESS;
 }
 
 

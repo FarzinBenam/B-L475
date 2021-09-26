@@ -2,17 +2,19 @@
 #include "Configs.h"
 
 /* Exported constants --------------------------------------------------------*/
-
+extern const char	_Error[];
 /* Private define ------------------------------------------------------------*/
-
-
-
 
 
 /**
  *  @brief HTS221 Slave address
  */
 static void   bsp_config	(void);
+static void		ISR_Config	(void);
+static void		rtc_config	(void);
+static void		i2c_config	(void);
+
+static void		time_set		(void);
 static void		crc_init8		(void);
 static void		crc_init32	(void);
 
@@ -30,12 +32,15 @@ extern volatile uint32_t tick;
 
 uint8_t Configs (void)
 {
-  //__disable_irq();	// Disable interrupts
+  __disable_irq();	// Disable interrupts
   
   bsp_config();
+	ISR_Config();
   //_bsp_clk_freq_get();
   i2c_config();
-  qspi_config();
+  if(qspi_config() != SUCCESS){
+		terminal("\n%sQSPI", _Error);
+	}
 	rtc_config();
   
   
@@ -56,7 +61,7 @@ uint8_t Configs (void)
 
 /* ==============   BOARD SPECIFIC CONFIGURATION CODE BEGIN    ============== */
 // RCC, GPIO, USART, ISR, SysTick 
-static void  bsp_config (void)
+static void		bsp_config	(void)
 {
   LL_GPIO_InitTypeDef   GPIO_InitDef;
   LL_USART_InitTypeDef  USART_InitStruct;
@@ -106,7 +111,7 @@ static void  bsp_config (void)
   LL_RCC_SetAPB1Prescaler(LL_RCC_APB1_DIV_1);
   LL_RCC_SetAPB2Prescaler(LL_RCC_APB2_DIV_1);
   
-/* SysTic Configuration ***************************************************/    
+/* SysTick Configuration **************************************************/    
   #if (systick == 1)
     
     /* Set systick to 1ms in using frequency set to 80MHz */
@@ -206,8 +211,53 @@ static void  bsp_config (void)
   #endif 
 
 }
-/* ==============   BOARD SPECIFIC CONFIGURATION CODE END      ============== */
-void	rtc_config		(void)
+
+static void		ISR_Config	(void)
+{
+	RCC->APB2ENR	|= RCC_APB2ENR_SYSCFGEN;// Bit 0 SYSCFGEN: SYSCFG + COMP + VREFBUF clock enable
+
+//	//External Interrupts (EXTI)
+//  /*******************************************************************************/  
+//	// EXTI for PE1 (WiFi RDY Pin)
+//	SYSCFG->EXTICR[0] &= ~(IO_4|IO_5|IO_6|IO_7); 
+//	SYSCFG->EXTICR[0] = (1<<6); 
+//	EXTI->RTSR1				|= WIFI_RDY_PIN;
+//	EXTI->FTSR1				&= ~WIFI_RDY_PIN;
+//	EXTI->IMR1				|= WIFI_RDY_PIN;
+//	NVIC_SetPriority	(EXTI1_IRQn, 1);			// Priority level 1
+//	NVIC_EnableIRQ		(EXTI1_IRQn);
+	
+	
+	//EXTI13 external interrupt
+	// select the source input for the EXTI13 external interrupt.
+	// EXTICR[3] -> because we count from 0 then EXTICR[3] = EXTICR[4] here
+	SYSCFG->EXTICR[3] &= ~(SYSCFG_EXTICR4_EXTI13); 
+	SYSCFG->EXTICR[3] = (1<<5); 
+	EXTI->RTSR1				&= ~USER_BUTTON_PIN;
+	EXTI->FTSR1				|= USER_BUTTON_PIN;
+	EXTI->IMR1				|= USER_BUTTON_PIN;
+	NVIC_SetPriority	(EXTI15_10_IRQn, 1);	    // Priority level 1
+	NVIC_EnableIRQ		(EXTI15_10_IRQn);
+	
+	
+	// USART1 (stlink) or UART4 (HC-05) interrupt
+	/*******************************************************************************/  
+	// A USART interrupt is generated whenever ORE=1 or RXNE=1 in the USART_ISR register
+	terminal_usart->CR1		|= (1 << 5); 			// RXNE interrupt enable
+	NVIC_SetPriority	(terminal_IRQn, 1); 		// Priority level 1
+	NVIC_EnableIRQ		(terminal_IRQn);
+	
+	// USART3 interrupt  (ISM43362-M3G-L44 wifi module)
+	/*******************************************************************************/  
+	// A USART interrupt is generated whenever ORE=1 or RXNE=1 in the USART_ISR register
+	USART3->CR1		|= (1 << 5); 					// RXNE interrupt enable
+	NVIC_SetPriority	(USART3_IRQn, 1); 			// Priority level 1
+	NVIC_EnableIRQ		(USART3_IRQn);
+    
+	
+	/*******************************************************************************/
+}
+static void		rtc_config	(void)
 {
 	LL_RTC_InitTypeDef rtc_init;
 	
@@ -229,23 +279,7 @@ void	rtc_config		(void)
 	
 	
 }
-
-
-uint8_t	crc_8bit (uint8_t * buffer, uint8_t length)
-{
-	volatile uint8_t i, temp;
-	
-	crc_init8();
-	
-	for(i = 0; i < length; i++){
-		CRC->DR = buffer[i];
-	}
-	temp = CRC->DR;
-	
-	RCC->AHB1ENR &= ~RCC_AHB1ENR_CRCEN;
-	return temp;
-}
-void	time_set	(void)
+static void		time_set		(void)
 {
 	LL_RTC_TimeTypeDef time;
 	LL_RTC_DateTypeDef date;
@@ -261,41 +295,8 @@ void	time_set	(void)
 	LL_RTC_TIME_Init(RTC, LL_RTC_FORMAT_BIN, &time);
 	LL_RTC_DATE_Init(RTC, LL_RTC_FORMAT_BIN, &date);
 }
-void	time_show		(void)
-{
-	LL_RTC_TimeTypeDef	time;
-	LL_RTC_DateTypeDef	date;
-	
-	time_read(&time, &date);
-	
-	terminal("\n%.2X:%.2X:%.2X ",time.Hours, time.Minutes, time.Seconds);
-	terminal("__20%.2X-%.2X-%.2X", date.Year, date.Month, date.Day);
-	if(RTC->TR & RTC_TR_PM) terminal("PM");
-
-}
-void	time_read (LL_RTC_TimeTypeDef	*time, LL_RTC_DateTypeDef	*date)
-{
-	rtc_time_params timeparams;
-	rtc_date_params dateparams;
-	uint32_t *ptr;
-	
-	
-	ptr = &timeparams;	/* store address of timeparam in pointer variable*/
-	*ptr = RTC->TR;			/* store the value to the pointing address */
-	
-	time->Seconds = timeparams.second;
-	time->Minutes = timeparams.minute;
-	time->Hours = timeparams.hour;
-	
-	ptr = &dateparams; /* store address of dateparam in pointer variable*/
-	*ptr = RTC->DR;
-	
-	date->Day = dateparams.Day;
-	date->Month = dateparams.month;
-	date->WeekDay = dateparams.weekday;
-	date->Year = dateparams.year;
-}
-void  i2c_config (void)
+/* ==============   I2C2 SPECIFI FUNCTIONS         ========================== */
+static void		i2c_config (void)
 {
   LL_I2C_InitTypeDef    I2C_InitStruct;
   LL_GPIO_InitTypeDef   GPIO_InitDef;
@@ -365,16 +366,10 @@ void  i2c_config (void)
 //  LL_I2C_EnableIT_NACK(I2C2);
 //  LL_I2C_EnableIT_ERR(I2C2);
 //  LL_I2C_EnableIT_STOP(I2C2);
-
-  
-  
-  
-  
-  
-  
 }
 
-void  i2c2_read (uint8_t SADD, uint8_t ReadADD, uint32_t TransferSize, uint8_t *buffer)
+
+void  i2c2_read									(uint8_t SADD, uint8_t ReadADD, uint32_t TransferSize, uint8_t *buffer)
 {
   uint32_t temp = ReadADD;
 
@@ -438,7 +433,7 @@ void  i2c2_read (uint8_t SADD, uint8_t ReadADD, uint32_t TransferSize, uint8_t *
   
 }
 
-void  i2c2_write (uint8_t SADD, uint8_t WriteADD, uint32_t TransferSize, uint8_t *buffer)
+void  i2c2_write								(uint8_t SADD, uint8_t WriteADD, uint32_t TransferSize, uint8_t *buffer)
 {  
   while((I2C2->ISR & I2C_ISR_BUSY) == SET);
   //terminal("\nbus is not busy");
@@ -475,21 +470,15 @@ void  i2c2_write (uint8_t SADD, uint8_t WriteADD, uint32_t TransferSize, uint8_t
   
   CLEAR_BIT(I2C2->CR2, 0x3FFFFFF);  // reseting the CR2
 }
-void  _bsp_clk_freq_get (void)
-{
-  LL_RCC_ClocksTypeDef RCC_Clocks;
-  
-  LL_RCC_GetSystemClocksFreq(&RCC_Clocks);
-  
-  
-  terminal("\nSYSCLK:%d", RCC_Clocks.HCLK_Frequency);
-  terminal("\nHCLK:  %d", RCC_Clocks.HCLK_Frequency);
-  terminal("\nPCLK1: %d", RCC_Clocks.PCLK1_Frequency);
-  terminal("\nPCLK2: %d", RCC_Clocks.PCLK2_Frequency);
-  
-}
 
-uint8_t sensor_read (uint16_t DeviceAddr, uint8_t RegisterAddr)
+
+
+
+
+
+
+
+uint8_t i2c2_sensor_read				(uint16_t DeviceAddr, uint8_t RegisterAddr)
 {
   uint8_t buffer[1];
 
@@ -498,24 +487,61 @@ uint8_t sensor_read (uint16_t DeviceAddr, uint8_t RegisterAddr)
   return buffer[0];
 }
 
-void  sensor_readmultiple (uint16_t DeviceAddr, uint8_t RegisterAddr, uint8_t *buffer, uint8_t readsize)
+void  i2c2_sensor_readmultiple	(uint16_t DeviceAddr, uint8_t RegisterAddr, uint8_t *buffer, uint8_t readsize)
 {
   i2c2_read(DeviceAddr, RegisterAddr, readsize, buffer);
 }
-void  sensor_write (uint16_t DeviceAddr, uint8_t RegisterAddr, uint8_t *tmp)
+void  i2c2_sensor_write					(uint16_t DeviceAddr, uint8_t RegisterAddr, uint8_t *tmp)
 {
   i2c2_write(DeviceAddr, RegisterAddr, 1, tmp);
 
 }
 
-void	nl	(uint8_t line)
+
+
+
+
+/* ==============   Time Functions      ===================================== */
+void	time_show	(void)
 {
-	uint8_t i;
-	for(i = 0; i < line; i++){
-		terminal("\n");
-	}
+	LL_RTC_TimeTypeDef	time;
+	LL_RTC_DateTypeDef	date;
+	
+	time_read(&time, &date);
+	
+	terminal("\n%.2X:%.2X:%.2X ",time.Hours, time.Minutes, time.Seconds);
+	terminal("__20%.2X-%.2X-%.2X", date.Year, date.Month, date.Day);
+	if(RTC->TR & RTC_TR_PM) terminal("PM");
+
 }
-static void	crc_init8	(void)
+void	time_read (LL_RTC_TimeTypeDef	*time, LL_RTC_DateTypeDef	*date)
+{
+	rtc_time_params timeparams;
+	rtc_date_params dateparams;
+	uint32_t *ptr;
+	
+	
+	ptr = &timeparams;	/* store address of timeparam in pointer variable*/
+	*ptr = RTC->TR;			/* store the value to the pointing address */
+	
+	time->Seconds = timeparams.second;
+	time->Minutes = timeparams.minute;
+	time->Hours = timeparams.hour;
+	
+	ptr = &dateparams; /* store address of dateparam in pointer variable*/
+	*ptr = RTC->DR;
+	
+	date->Day = dateparams.Day;
+	date->Month = dateparams.month;
+	date->WeekDay = dateparams.weekday;
+	date->Year = dateparams.year;
+}
+
+
+
+
+/* ==============   CRC Functions      ====================================== */
+static void	crc_init8		(void)
 {
 	RCC->AHB1ENR |= RCC_AHB1ENR_CRCEN;
 	
@@ -533,153 +559,42 @@ static void	crc_init32	(void)
 	CRC->CR   = 0x00000000;       				// sets poly size to 32 bit
 	CRC->INIT = 0xFFFFFFFF;								//32 bit init value
 }
-/**
-  * @brief  Set HTS221 temperature sensor Initialization.
-  * @param  DeviceAddr: I2C device address
-  * @param  InitStruct: pointer to a TSENSOR_InitTypeDef structure 
-  *         that contains the configuration setting for the HTS221.
-  */
-/* ==============   COMPONENTS     CONFIGURATION CODE BEGIN    ============== */
 
-void  HTS221_T_Init (uint16_t DeviceAddr)
-{  
-  uint8_t tmp[1];
-  
-  tmp[0] = sensor_read(DeviceAddr, (uint8_t)0x10);
-  tmp[0] &= ~(uint8_t)(0x3F);
-  /* Apply settings to AV_CONF */
-  sensor_write(DeviceAddr, 0x10, tmp);
-  
-  
-  /* Read CTRL_REG1 */
-  tmp[0] = sensor_read(DeviceAddr, (uint8_t)0x20);
-  
-  /* Enable BDU */
-  tmp[0] &= ~(uint8_t)0x04;
-  tmp[0] |= (1 <<  HTS221_BIT(2));
-  
-  /* Set default ODR */
-  tmp[0] &= ~(uint8_t)0x03;
-  tmp[0] |= (uint8_t)0x01; /* Set ODR to 1Hz */
-  
-  /* Activate the device */
-  tmp[0] |= (uint8_t)0x80;
-  
-  
-  /* Apply settings to CTRL_REG1 */
-  sensor_write(DeviceAddr, 0x20, tmp);
-}
-
-/**
-  * @brief  Read temperature value of HTS221
-  * @param  DeviceAddr: I2C device address
-  * @retval temperature value
-  */
-float HTS221_T_ReadTemp (uint16_t DeviceAddr)
+uint8_t	crc_8bit				(uint8_t * buffer, uint8_t length)
 {
-  int16_t T0_out, T1_out, T_out, T0_degC_x8_u16, T1_degC_x8_u16;
-  int16_t T0_degC, T1_degC;
-  uint8_t buffer[4], tmp;
-  float tmp_f;
-
-  sensor_readmultiple(DeviceAddr, 0x32, buffer, 2);
-
-  tmp = sensor_read(DeviceAddr, 0x35);
-  T0_degC_x8_u16 = (((uint16_t)(tmp & 0x03)) << 8) | ((uint16_t)buffer[0]);
-  T1_degC_x8_u16 = (((uint16_t)(tmp & 0x0C)) << 6) | ((uint16_t)buffer[1]);
-  T0_degC = T0_degC_x8_u16 >> 3;
-  T1_degC = T1_degC_x8_u16 >> 3;
-
-  sensor_readmultiple(DeviceAddr, 0x3C, buffer, 4);
-
-  T0_out = (((uint16_t)buffer[1]) << 8) | (uint16_t)buffer[0];
-  T1_out = (((uint16_t)buffer[3]) << 8) | (uint16_t)buffer[2];
-
-  sensor_readmultiple(DeviceAddr, 0x2A, buffer, 2);
-
-  T_out = (((uint16_t)buffer[1]) << 8) | (uint16_t)buffer[0];
-
-  tmp_f = (float)(T_out - T0_out) * (float)(T1_degC - T0_degC) / (float)(T1_out - T0_out)  +  T0_degC;
-/*  terminal("\nT0_degC: %d",T0_degC);
- terminal("\nT1_degC: %d",T1_degC);
- terminal("\n");
- terminal("\nT0_out: %d",T0_out);
- terminal("\nT1_out: %d",T1_out);
- terminal("\n");
- terminal("\nT_out:   %d",T_out);
- terminal("\n");
- */
-	//terminal("\nTemperature:%f",tmp_f);
-  return tmp_f;
+	volatile uint8_t i, temp;
+	
+	crc_init8();
+	
+	for(i = 0; i < length; i++){
+		CRC->DR = buffer[i];
+	}
+	temp = CRC->DR;
+	
+	RCC->AHB1ENR &= ~RCC_AHB1ENR_CRCEN;
+	return temp;
 }
 
-/** @defgroup HTS221_Humidity_Private_Functions HTS221 Humidity Private Functions
-  * @{
-  */
-/**
-  * @brief  Set HTS221 humidity sensor Initialization.
-  */
-void  HTS221_H_Init  (uint16_t DeviceAddr)
+/* ==============   General Functions  ====================================== */
+void  _bsp_clk_freq_get (void)
 {
-  uint8_t tmp[0];
+  LL_RCC_ClocksTypeDef RCC_Clocks;
   
-  /* Read CTRL_REG1 */
-  tmp[0] = sensor_read(DeviceAddr, 0x20);
+  LL_RCC_GetSystemClocksFreq(&RCC_Clocks);
   
-  /* Enable BDU */
-  tmp[0] &= ~0x04;
-  tmp[0] |= (1 << HTS221_BIT(2));
   
-  /* Set default ODR */
-  tmp[0] &= ~0x03;
-  tmp[0] |= (uint8_t)0x01; /* Set ODR to 1Hz */
+  terminal("\nSYSCLK:%d", RCC_Clocks.HCLK_Frequency);
+  terminal("\nHCLK:  %d", RCC_Clocks.HCLK_Frequency);
+  terminal("\nPCLK1: %d", RCC_Clocks.PCLK1_Frequency);
+  terminal("\nPCLK2: %d", RCC_Clocks.PCLK2_Frequency);
   
-  /* Activate the device */
-  tmp[0] |= 0x80;
-  
-  /* Apply settings to CTRL_REG1 */
-  sensor_write(DeviceAddr, 0x20, tmp);
 }
 
-/**
-  * @brief  Read humidity value of HTS221
-  * @retval humidity value;
-  */
-float HTS221_H_ReadHumidity(uint16_t DeviceAddr)
+void	nl	(uint8_t line)
 {
-  int16_t H0_T0_out, H1_T0_out, H_T_out;
-  int16_t H0_rh, H1_rh;
-  uint8_t buffer[2];
-  float tmp_f;
-
-  sensor_readmultiple(DeviceAddr, 0x30, buffer, 2);
-
-  H0_rh = buffer[0] >> 1;
-  H1_rh = buffer[1] >> 1;
-
-  sensor_readmultiple(DeviceAddr, 0x36, buffer, 2);
-
-  H0_T0_out = (((uint16_t)buffer[1]) << 8) | (uint16_t)buffer[0];
-
-  sensor_readmultiple(DeviceAddr, 0x3A, buffer, 2);
-
-  H1_T0_out = (((uint16_t)buffer[1]) << 8) | (uint16_t)buffer[0];
-
-  sensor_readmultiple(DeviceAddr, 0x28, buffer, 2);
-
-  H_T_out = (((uint16_t)buffer[1]) << 8) | (uint16_t)buffer[0];
-
-  tmp_f = (float)(H_T_out - H0_T0_out) * (float)(H1_rh - H0_rh) / (float)(H1_T0_out - H0_T0_out)  +  H0_rh;
-  tmp_f *= 10.0f;
-
-  tmp_f = ( tmp_f > 1000.0f ) ? 1000.0f
-        : ( tmp_f <    0.0f ) ?    0.0f
-        : tmp_f;
-				
-				
-	tmp_f /= 10.0f;
-	//terminal("\nHumdity:%f",tmp_f);
-  return tmp_f;
+	uint8_t i;
+	for(i = 0; i < line; i++){
+		terminal("\n");
+	}
 }
-
-
+/* ========================================================================== */

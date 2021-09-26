@@ -1,18 +1,18 @@
 /**
   ******************************************************************************
   * @file    main.h 
-  * @author  MCD Application Team
+  * @author  Farzin M.Benam
   * @brief   Header for main.c module
   ******************************************************************************
   * @attention
   *
-  * <h2><center>&copy; Copyright (c) 2017 STMicroelectronics.
-  * All rights reserved.</center></h2>
+  * 
+  * 
   *
-  * This software component is licensed by ST under BSD 3-Clause license,
-  * the "License"; You may not use this file except in compliance with the
-  * License. You may obtain a copy of the License at:
-  *                        opensource.org/licenses/BSD-3-Clause
+  * 
+  * 
+  * 
+  * 
   *
   ******************************************************************************
   */
@@ -55,10 +55,12 @@
 //#include "stm32l4xx_ll_wwdg.h"
 
 /* FCMD Libs */
+#include "fcmd.h"
 #include "configs.h"
 #include "uart.h"
 #include "qspi.h"
 #include "fs.h"
+#include "components.h"
 #include "../../Libraries/STM32L4_v1.17.0/Drivers/BSP/Components/mx25r6435f/mx25r6435f.h"
 
 
@@ -157,9 +159,22 @@ typedef struct{
 #define USER_BUTTON_IRQHANDLER                  EXTI15_10_IRQHandler
 
 /**
-  * @brief HTS221 defines
+  * @brief Commander defines
   */
-
+#define MAX_COMMANDS        20
+#define CMD_BUFFER_SIZE     32
+#define IIC_BUFFER_SIZE     512
+#define	WIFI_BUFFER_SIZE    1024
+																								
+#define ENTER         0x0D
+#define SPACE         ' '
+#define STX           0x02
+#define BACKSPACE1    0x08
+#define BACKSPACE2    0x7F
+#define CommandSign   '>'
+#define STAR          '*'
+#define UNDERLINE     '_'
+#define SCAPE_BUT     '`'
                                                 
 /* ==============   BOARD SPECIFIC CONFIGURATION CODE END      ============== */
 
