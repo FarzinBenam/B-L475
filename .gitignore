@@ -1,0 +1,21 @@
+*.s
+*.d
+*.map
+*.uvprojx
+*.uvoptx
+*.user 20
+*.FS
+*.farzi
+*.scvd
+*.dbgconf
+*.o
+*.iex
+*.htm
+*.1
+*.lnp
+*.__i
+Commander/Objects/
+Libraries/STM32L4_V1.17.0/
+freertos/
+Commander/
+Libraries/Flib/archive/
