@@ -13,7 +13,7 @@
 #define rtos            0
 #define COM             1               // usart1 used to communicate with COM port1
 #define hc_05           0								// uart4 used if the hc-05 ble module used
-#define systick         1               // use RTC for systick
+#define systick         0               // use RTC for systick
 #define qspi_debug      0
 
 
@@ -61,6 +61,15 @@
 #define USART1_BAUDRATE	115200
 #define USART3_BAUDRATE	115200
 #define UART4_BAUDRATE	9600
+
+#define USART1_RX       LL_GPIO_PIN_7
+#define USART1_TX       LL_GPIO_PIN_6
+#define USART1_GPIO     GPIOB
+
+#define UART4_RX        LL_GPIO_PIN_1
+#define UART4_TX        LL_GPIO_PIN_0
+#define UART4_GPIO      GPIOA
+
 
 
 /*******************************************************************************

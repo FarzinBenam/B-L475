@@ -75,7 +75,7 @@ volatile uint32_t tick;
 int main(void)
 {
   /* Private variables ---------------------------------------------------------*/
-  fs_folder_def fsfolder;
+  
 	SysStatus.CmdStatus = 0;
   
   /* Configuration functions ---------------------------------------------------*/

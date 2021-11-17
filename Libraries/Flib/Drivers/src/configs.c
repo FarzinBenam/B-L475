@@ -37,12 +37,9 @@ uint8_t Configs (void)
 	ISR_Config();
   //_bsp_clk_freq_get();
   i2c_config();
-  if(qspi_config() != SUCCESS){
-		terminal("\n%sQSPI", _Error);
-	}
+  qspi_config();
 	rtc_config();
-  
-  
+  fs_init();
   
   /* Componentefs Inits  -------------------------------------------------------*/
   HTS221_T_Init(HTS221_SLAVE_ADD);
@@ -51,10 +48,11 @@ uint8_t Configs (void)
   
   
   __enable_irq();
-	nl(4);
+	nl(10);
 	terminal("_____________________\n");
-	time_show();
-  terminal("\nWelcome! \n_____________________\n");
+  terminal("Welcome!\n\n>");
+	//time_show();
+  
   return 0;
 }
 
@@ -151,11 +149,11 @@ static void		bsp_config	(void)
     GPIOA_CLK_ENABLE()
     
     LL_GPIO_StructInit(&GPIO_InitDef);    // de-init the gpio struct
-    GPIO_InitDef.Pin = LL_GPIO_PIN_0|LL_GPIO_PIN_1;
+    GPIO_InitDef.Pin = UART4_RX|UART4_TX;
     GPIO_InitDef.Mode = LL_GPIO_MODE_ALTERNATE;
     GPIO_InitDef.Speed = LL_GPIO_SPEED_FREQ_HIGH;
     GPIO_InitDef.Alternate = LL_GPIO_AF_8;
-    LL_GPIO_Init(GPIOA, &GPIO_InitDef);
+    LL_GPIO_Init(UART4_GPIO, &GPIO_InitDef);
     
     
     /* USART1 Clock Enable */
@@ -182,11 +180,11 @@ static void		bsp_config	(void)
     GPIOB_CLK_ENABLE();
     
     LL_GPIO_StructInit(&GPIO_InitDef);    // de-init the gpio struct
-    GPIO_InitDef.Pin = LL_GPIO_PIN_6|LL_GPIO_PIN_7;
+    GPIO_InitDef.Pin = USART1_RX|USART1_TX;
     GPIO_InitDef.Mode = LL_GPIO_MODE_ALTERNATE;
     GPIO_InitDef.Speed = LL_GPIO_SPEED_FREQ_HIGH;
     GPIO_InitDef.Alternate = LL_GPIO_AF_7;
-    LL_GPIO_Init(GPIOB, &GPIO_InitDef);
+    LL_GPIO_Init(USART1_GPIO, &GPIO_InitDef);
     
     
     
@@ -256,7 +254,7 @@ static void		ISR_Config	(void)
 	
 	/*******************************************************************************/
 }
-static void		rtc_config	(void)
+static void		rtc_config  (void)
 {
 	LL_RTC_InitTypeDef rtc_init;
 	
@@ -296,7 +294,7 @@ static void   spi_config  (void)
   
 }
 /* ==============   I2C2 SPECIFI FUNCTIONS         ========================== */
-static void		i2c_config (void)
+static void		i2c_config  (void)
 {
   LL_I2C_InitTypeDef    I2C_InitStruct;
   LL_GPIO_InitTypeDef   GPIO_InitDef;
@@ -369,7 +367,7 @@ static void		i2c_config (void)
 }
 
 
-void  i2c2_read									(uint8_t SADD, uint8_t ReadADD, uint32_t TransferSize, uint8_t *buffer)
+void  i2c2_read           (uint8_t SADD, uint8_t ReadADD, uint32_t TransferSize, uint8_t *buffer)
 {
   uint32_t temp = ReadADD;
 
@@ -433,7 +431,7 @@ void  i2c2_read									(uint8_t SADD, uint8_t ReadADD, uint32_t TransferSize, u
   
 }
 
-void  i2c2_write								(uint8_t SADD, uint8_t WriteADD, uint32_t TransferSize, uint8_t *buffer)
+void  i2c2_write          (uint8_t SADD, uint8_t WriteADD, uint32_t TransferSize, uint8_t *buffer)
 {  
   while((I2C2->ISR & I2C_ISR_BUSY) == SET);
   //terminal("\nbus is not busy");

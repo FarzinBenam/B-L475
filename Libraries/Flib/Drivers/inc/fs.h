@@ -33,6 +33,7 @@ typedef struct{
 	uint32_t	EndAddr;			// end address of the folder on spi flash
 	uint32_t	LastLogAddr;	// address of the last log
 	uint8_t   LogLength;
+  uint32_t  LogCount;
   
 
 }fs_folder_def;
@@ -40,9 +41,9 @@ typedef struct{
 
 
 /* Exported functions --------------------------------------------------------*/ 
-uint8_t	_fs_log (char *data, fs_folder_def *fsfolder);
-uint8_t	_fs_new_folder	(fs_folder_def *fsfolder);
-void		T_H_log_init (fs_folder_def *fsfolder);
+uint8_t	fs_log (char *data);
+uint8_t	fs_new_folder	(fs_folder_def *fsfolder);
+
 void		T_H_log (fs_folder_def *fsfolder);
 uint8_t T_H_log_finder (fs_folder_def *fsfolder, uint32_t log_num);
 

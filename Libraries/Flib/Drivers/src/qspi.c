@@ -114,7 +114,6 @@ uint8_t  qspi_config (void)
     return ERROR;
   }
 	
-	terminal("\nQSPI OK!");
   return SUCCESS;
 }
 
